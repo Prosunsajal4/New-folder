@@ -193,11 +193,11 @@ export default function AIChat() {
               onChange={(e) => setInputMessage(e.target.value)}
               placeholder="Type your message..."
               className="flex-1 px-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={loading}
+              disabled={sendingMessage}
             />
             <button
               type="submit"
-              disabled={loading || !inputMessage.trim()}
+              disabled={sendingMessage || !inputMessage.trim()}
               className="px-6 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl hover:from-purple-600 hover:to-blue-600 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Sparkles size={20} />
