@@ -1,13 +1,92 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useRouter } from 'next/navigation';
-import Sidebar from '../../components/Sidebar';
-import axios from '../../lib/axios';
-import { motion } from 'framer-motion';
-import { Plus, Edit2, Trash2, Clock, TrendingUp, Calendar } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
+import Sidebar from "../../components/Sidebar";
+import axios from "../../lib/axios";
+import { motion } from "framer-motion";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Clock,
+  TrendingUp,
+  Calendar,
+  CheckCircle,
+  Circle,
+} from "lucide-react";
+import toast from "react-hot-toast";
+
+const CountdownTimer = ({ targetDate }) => {
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = new Date(targetDate).getTime() - now;
+
+      if (distance > 0) {
+        setTimeLeft({
+          days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+          hours: Math.floor(
+            (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+          ),
+          minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((distance % (1000 * 60)) / 1000),
+        });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  const isOverdue = new Date(targetDate) < new Date();
+
+  if (isOverdue) {
+    return (
+      <div className="text-red-600 dark:text-red-400 font-semibold">
+        Exam Overdue
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex gap-2 text-sm">
+      <div className="text-center">
+        <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded px-2 py-1 font-bold">
+          {timeLeft.days}
+        </div>
+        <div className="text-xs text-gray-500">Days</div>
+      </div>
+      <div className="text-center">
+        <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded px-2 py-1 font-bold">
+          {timeLeft.hours}
+        </div>
+        <div className="text-xs text-gray-500">Hrs</div>
+      </div>
+      <div className="text-center">
+        <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded px-2 py-1 font-bold">
+          {timeLeft.minutes}
+        </div>
+        <div className="text-xs text-gray-500">Min</div>
+      </div>
+      <div className="text-center">
+        <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded px-2 py-1 font-bold">
+          {timeLeft.seconds}
+        </div>
+        <div className="text-xs text-gray-500">Sec</div>
+      </div>
+    </div>
+  );
+};
 
 export default function Exams() {
   const { isAuthenticated, loading } = useAuth();
@@ -18,17 +97,23 @@ export default function Exams() {
   const [loadingExams, setLoadingExams] = useState(true);
 
   const [formData, setFormData] = useState({
-    title: '',
-    subject: '',
-    date: '',
-    topics: '',
-    readiness: 0,
-    notes: '',
+    title: "",
+    subject: "",
+    date: "",
+    topics: "",
+    readinessCheckboxes: {
+      questionsCollected: false,
+      ctQuestionsCovered: false,
+      booksAndPdfsCollected: false,
+      answersReady: false,
+      fullTopicCovered: false,
+    },
+    notes: "",
   });
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [isAuthenticated, loading, router]);
 
@@ -41,10 +126,10 @@ export default function Exams() {
   const fetchExams = async () => {
     try {
       setLoadingExams(true);
-      const response = await axios.get('/exams');
+      const response = await axios.get("/exams");
       setExams(response.data);
     } catch (error) {
-      toast.error('Failed to load exams');
+      toast.error("Failed to load exams");
       console.error(error);
     } finally {
       setLoadingExams(false);
@@ -56,41 +141,50 @@ export default function Exams() {
     try {
       const examData = {
         ...formData,
-        topics: formData.topics.split(',').map(t => t.trim()).filter(t => t),
+        topics: formData.topics
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t),
       };
 
       if (editingExam) {
         await axios.put(`/exams/${editingExam._id}`, examData);
-        toast.success('Exam updated successfully');
+        toast.success("Exam updated successfully");
       } else {
-        await axios.post('/exams', examData);
-        toast.success('Exam added successfully');
+        await axios.post("/exams", examData);
+        toast.success("Exam added successfully");
       }
       setShowModal(false);
       setEditingExam(null);
       setFormData({
-        title: '',
-        subject: '',
-        date: '',
-        topics: '',
-        readiness: 0,
-        notes: '',
+        title: "",
+        subject: "",
+        date: "",
+        topics: "",
+        readinessCheckboxes: {
+          questionsCollected: false,
+          ctQuestionsCovered: false,
+          booksAndPdfsCollected: false,
+          answersReady: false,
+          fullTopicCovered: false,
+        },
+        notes: "",
       });
       fetchExams();
     } catch (error) {
-      toast.error('Failed to save exam');
+      toast.error("Failed to save exam");
       console.error(error);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this exam?')) return;
+    if (!confirm("Are you sure you want to delete this exam?")) return;
     try {
       await axios.delete(`/exams/${id}`);
-      toast.success('Exam deleted successfully');
+      toast.success("Exam deleted successfully");
       fetchExams();
     } catch (error) {
-      toast.error('Failed to delete exam');
+      toast.error("Failed to delete exam");
       console.error(error);
     }
   };
@@ -100,10 +194,16 @@ export default function Exams() {
     setFormData({
       title: exam.title,
       subject: exam.subject,
-      date: exam.date ? exam.date.split('T')[0] : '',
-      topics: exam.topics ? exam.topics.join(', ') : '',
-      readiness: exam.readiness,
-      notes: exam.notes || '',
+      date: exam.date ? exam.date.split("T")[0] : "",
+      topics: exam.topics ? exam.topics.join(", ") : "",
+      readinessCheckboxes: exam.readinessCheckboxes || {
+        questionsCollected: false,
+        ctQuestionsCovered: false,
+        booksAndPdfsCollected: false,
+        answersReady: false,
+        fullTopicCovered: false,
+      },
+      notes: exam.notes || "",
     });
     setShowModal(true);
   };
@@ -114,10 +214,10 @@ export default function Exams() {
   };
 
   const getReadinessColor = (readiness) => {
-    if (readiness >= 80) return 'bg-green-500';
-    if (readiness >= 60) return 'bg-yellow-500';
-    if (readiness >= 40) return 'bg-orange-500';
-    return 'bg-red-500';
+    if (readiness >= 80) return "bg-green-500";
+    if (readiness >= 60) return "bg-yellow-500";
+    if (readiness >= 40) return "bg-orange-500";
+    return "bg-red-500";
   };
 
   if (loading || loadingExams) {
@@ -133,7 +233,7 @@ export default function Exams() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
-      
+
       <main className="lg:ml-64 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -153,12 +253,18 @@ export default function Exams() {
               onClick={() => {
                 setEditingExam(null);
                 setFormData({
-                  title: '',
-                  subject: '',
-                  date: '',
-                  topics: '',
-                  readiness: 0,
-                  notes: '',
+                  title: "",
+                  subject: "",
+                  date: "",
+                  topics: "",
+                  readinessCheckboxes: {
+                    questionsCollected: false,
+                    ctQuestionsCovered: false,
+                    booksAndPdfsCollected: false,
+                    answersReady: false,
+                    fullTopicCovered: false,
+                  },
+                  notes: "",
                 });
                 setShowModal(true);
               }}
@@ -188,7 +294,7 @@ export default function Exams() {
                     key={exam._id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`glass-card rounded-xl p-6 ${isOverdue ? 'border-l-4 border-red-500' : ''}`}
+                    className={`glass-card rounded-xl p-6 ${isOverdue ? "border-l-4 border-red-500" : ""}`}
                   >
                     <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
                       <div className="flex-1">
@@ -202,25 +308,21 @@ export default function Exams() {
                             </span>
                           )}
                         </div>
-                        
-                        <p className="text-gray-600 dark:text-gray-400 mb-3 capitalize">{exam.subject}</p>
-                        
+
+                        <p className="text-gray-600 dark:text-gray-400 mb-3 capitalize">
+                          {exam.subject}
+                        </p>
+
                         <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-3">
                           <div className="flex items-center gap-2">
                             <Calendar size={16} />
-                            <span>{new Date(exam.date).toLocaleDateString()}</span>
+                            <span>
+                              {new Date(exam.date).toLocaleDateString()}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2">
                             <Clock size={16} />
-                            <span>
-                              {isOverdue
-                                ? `${Math.abs(daysRemaining)} days ago`
-                                : daysRemaining === 0
-                                ? 'Today'
-                                : daysRemaining === 1
-                                ? 'Tomorrow'
-                                : `${daysRemaining} days`}
-                            </span>
+                            <CountdownTimer targetDate={exam.date} />
                           </div>
                         </div>
 
@@ -243,26 +345,83 @@ export default function Exams() {
                         )}
 
                         {exam.notes && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{exam.notes}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                            {exam.notes}
+                          </p>
                         )}
 
-                        {/* Readiness Progress */}
-                        <div>
-                          <div className="flex justify-between mb-1">
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Readiness
-                            </span>
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              {exam.readiness}%
-                            </span>
-                          </div>
-                          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${exam.readiness}%` }}
-                              transition={{ duration: 1 }}
-                              className={`h-2 rounded-full ${getReadinessColor(exam.readiness)}`}
-                            />
+                        {/* Readiness Checkboxes */}
+                        <div className="mb-3">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Readiness Checklist ({exam.readiness || 0}%)
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            <div className="flex items-center gap-2">
+                              {exam.readinessCheckboxes?.questionsCollected ? (
+                                <CheckCircle
+                                  size={16}
+                                  className="text-green-500"
+                                />
+                              ) : (
+                                <Circle size={16} className="text-gray-400" />
+                              )}
+                              <span className="text-sm">
+                                Questions collected
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {exam.readinessCheckboxes?.ctQuestionsCovered ? (
+                                <CheckCircle
+                                  size={16}
+                                  className="text-green-500"
+                                />
+                              ) : (
+                                <Circle size={16} className="text-gray-400" />
+                              )}
+                              <span className="text-sm">
+                                CT questions covered
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {exam.readinessCheckboxes
+                                ?.booksAndPdfsCollected ? (
+                                <CheckCircle
+                                  size={16}
+                                  className="text-green-500"
+                                />
+                              ) : (
+                                <Circle size={16} className="text-gray-400" />
+                              )}
+                              <span className="text-sm">
+                                Book and PDF collected
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {exam.readinessCheckboxes?.answersReady ? (
+                                <CheckCircle
+                                  size={16}
+                                  className="text-green-500"
+                                />
+                              ) : (
+                                <Circle size={16} className="text-gray-400" />
+                              )}
+                              <span className="text-sm">
+                                Answer of questions ready
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {exam.readinessCheckboxes?.fullTopicCovered ? (
+                                <CheckCircle
+                                  size={16}
+                                  className="text-green-500"
+                                />
+                              ) : (
+                                <Circle size={16} className="text-gray-400" />
+                              )}
+                              <span className="text-sm">
+                                Covered full topic
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -300,7 +459,7 @@ export default function Exams() {
               >
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {editingExam ? 'Edit Exam' : 'Add Exam'}
+                    {editingExam ? "Edit Exam" : "Add Exam"}
                   </h3>
                   <button
                     onClick={() => {
@@ -321,7 +480,9 @@ export default function Exams() {
                     <input
                       type="text"
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="e.g., Midterm Exam"
                       required
@@ -335,7 +496,9 @@ export default function Exams() {
                     <input
                       type="text"
                       value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, subject: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="e.g., Mathematics"
                       required
@@ -349,7 +512,9 @@ export default function Exams() {
                     <input
                       type="date"
                       value={formData.date}
-                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, date: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       required
                     />
@@ -362,7 +527,9 @@ export default function Exams() {
                     <input
                       type="text"
                       value={formData.topics}
-                      onChange={(e) => setFormData({ ...formData, topics: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, topics: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="e.g., Calculus, Algebra, Geometry"
                     />
@@ -370,16 +537,105 @@ export default function Exams() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Readiness: {formData.readiness}%
+                      Readiness Checklist
                     </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={formData.readiness}
-                      onChange={(e) => setFormData({ ...formData, readiness: parseInt(e.target.value) })}
-                      className="w-full"
-                    />
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={
+                            formData.readinessCheckboxes.questionsCollected
+                          }
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              readinessCheckboxes: {
+                                ...formData.readinessCheckboxes,
+                                questionsCollected: e.target.checked,
+                              },
+                            })
+                          }
+                          className="rounded"
+                        />
+                        <span className="text-sm">Questions collected</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={
+                            formData.readinessCheckboxes.ctQuestionsCovered
+                          }
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              readinessCheckboxes: {
+                                ...formData.readinessCheckboxes,
+                                ctQuestionsCovered: e.target.checked,
+                              },
+                            })
+                          }
+                          className="rounded"
+                        />
+                        <span className="text-sm">CT questions covered</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={
+                            formData.readinessCheckboxes.booksAndPdfsCollected
+                          }
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              readinessCheckboxes: {
+                                ...formData.readinessCheckboxes,
+                                booksAndPdfsCollected: e.target.checked,
+                              },
+                            })
+                          }
+                          className="rounded"
+                        />
+                        <span className="text-sm">Book and PDF collected</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.readinessCheckboxes.answersReady}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              readinessCheckboxes: {
+                                ...formData.readinessCheckboxes,
+                                answersReady: e.target.checked,
+                              },
+                            })
+                          }
+                          className="rounded"
+                        />
+                        <span className="text-sm">
+                          Answer of questions ready
+                        </span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={
+                            formData.readinessCheckboxes.fullTopicCovered
+                          }
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              readinessCheckboxes: {
+                                ...formData.readinessCheckboxes,
+                                fullTopicCovered: e.target.checked,
+                              },
+                            })
+                          }
+                          className="rounded"
+                        />
+                        <span className="text-sm">Covered full topic</span>
+                      </label>
+                    </div>
                   </div>
 
                   <div>
@@ -388,7 +644,9 @@ export default function Exams() {
                     </label>
                     <textarea
                       value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notes: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Additional notes about the exam"
                       rows={3}
@@ -399,7 +657,7 @@ export default function Exams() {
                     type="submit"
                     className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all font-semibold"
                   >
-                    {editingExam ? 'Update Exam' : 'Add Exam'}
+                    {editingExam ? "Update Exam" : "Add Exam"}
                   </button>
                 </form>
               </motion.div>
