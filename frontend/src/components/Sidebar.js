@@ -86,8 +86,8 @@ export default function Sidebar() {
         initial={{ x: -300 }}
         animate={{ x: isOpen ? 0 : -300 }}
         transition={{ type: 'spring', damping: 25 }}
-        className={`fixed left-0 top-0 h-full w-64 glass-card z-40 lg:static lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed left-0 top-0 h-full w-64 glass-card z-40 lg:static lg:translate-x-0 lg:h-auto lg:min-h-screen ${
+          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
         <div className="p-6">
