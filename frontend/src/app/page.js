@@ -21,7 +21,11 @@ import {
   Award,
   Smartphone,
   Globe,
-  ChevronDown
+  ChevronDown,
+  Github,
+  Linkedin,
+  Mail,
+  Phone
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -377,9 +381,9 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="bg-gray-900 text-white py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <div className="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg">
@@ -387,43 +391,79 @@ const LandingPage = () => {
                 </div>
                 <span className="text-2xl font-bold">StudentOS</span>
               </div>
-              <p className="text-gray-400 mb-4 max-w-md">
-                Empowering students worldwide with intelligent tools for academic success.
-                Transform your study habits and achieve your goals.
+              <p className="text-gray-400 mb-6 leading-relaxed max-w-md">
+                Empowering students worldwide with intelligent academic management tools.
+                Built with modern technologies to help you stay organized, focused, and achieve your academic goals.
               </p>
-              <div className="flex space-x-4">
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                  <span className="text-sm">📘</span>
-                </div>
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                  <span className="text-sm">📱</span>
-                </div>
-                <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-                  <span className="text-sm">💻</span>
-                </div>
+              <div className="flex space-x-4 mb-6">
+                <a href="https://github.com" className="text-gray-400 hover:text-white transition-colors" aria-label="GitHub">
+                  <Github size={24} />
+                </a>
+                <a href="https://linkedin.com" className="text-gray-400 hover:text-white transition-colors" aria-label="LinkedIn">
+                  <Linkedin size={24} />
+                </a>
+                <a href="mailto:prosunsajal123@gmail.com" className="text-gray-400 hover:text-white transition-colors" aria-label="Email">
+                  <Mail size={24} />
+                </a>
+                <a href="tel:+8801911572117" className="text-gray-400 hover:text-white transition-colors" aria-label="Phone">
+                  <Phone size={24} />
+                </a>
+              </div>
+              <div className="text-sm text-gray-400">
+                <p className="mb-1"><strong>Developed by:</strong> Prosun Mukherjee</p>
+                <p className="mb-1"><strong>Location:</strong> Khulna, Bangladesh</p>
+                <p><strong>Contact:</strong> prosunsajal123@gmail.com | +8801911572117</p>
               </div>
             </div>
+
             <div>
-              <h3 className="font-semibold mb-4">Product</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Security</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Updates</a></li>
+              <h4 className="text-lg font-semibold mb-6">Product</h4>
+              <ul className="space-y-3 text-gray-400">
+                <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">About Developer</Link></li>
+                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
+                <li><a href="#testimonials" className="hover:text-white transition-colors">Testimonials</a></li>
+                <li><a href="#stats" className="hover:text-white transition-colors">Statistics</a></li>
               </ul>
             </div>
+
             <div>
-              <h3 className="font-semibold mb-4">Support</h3>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="text-lg font-semibold mb-6">Support & Legal</h4>
+              <ul className="space-y-3 text-gray-400">
+                <li><a href="mailto:prosunsajal123@gmail.com" className="hover:text-white transition-colors">Contact Developer</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Bug Reports</a></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 StudentOS. All rights reserved. Made with ❤️ for students worldwide.</p>
+
+          {/* Developer Skills Highlight */}
+          <div className="border-t border-gray-800 pt-8 mb-8">
+            <div className="text-center mb-6">
+              <h4 className="text-lg font-semibold mb-4">Built with Modern Technologies</h4>
+              <div className="flex flex-wrap justify-center gap-3">
+                {['React.js', 'Next.js', 'Node.js', 'MongoDB', 'Tailwind CSS', 'TypeScript'].map((tech) => (
+                  <span key={tech} className="px-3 py-1 bg-gray-800 text-gray-300 rounded-full text-sm border border-gray-700">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 pt-8 text-center">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <p className="text-gray-400 mb-4 md:mb-0">
+                &copy; 2026 StudentOS. All rights reserved. Made with ❤️ by Prosun Mukherjee.
+              </p>
+              <div className="flex items-center gap-4 text-sm text-gray-400">
+                <span>Frontend Developer</span>
+                <span className="hidden md:block">•</span>
+                <span>Khulna, Bangladesh</span>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
