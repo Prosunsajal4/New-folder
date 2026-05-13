@@ -298,13 +298,17 @@ export default function Exams() {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10"></div>
                 <div className="relative z-10">
                   <div className="inline-flex p-4 bg-gradient-to-r from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-2xl mb-6">
-                    <Calendar size={64} className="text-blue-600 dark:text-blue-400" />
+                    <Calendar
+                      size={64}
+                      className="text-blue-600 dark:text-blue-400"
+                    />
                   </div>
                   <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                     No Exams Scheduled
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 text-lg mb-6 max-w-md mx-auto">
-                    Start your exam preparation journey by adding your first exam. Track deadlines and stay organized!
+                    Start your exam preparation journey by adding your first
+                    exam. Track deadlines and stay organized!
                   </p>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -348,16 +352,21 @@ export default function Exams() {
                         <div className="flex items-start justify-between">
                           <div className="space-y-2">
                             <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-xl ${
-                                isOverdue
-                                  ? "bg-red-100 dark:bg-red-900/30"
-                                  : "bg-blue-100 dark:bg-blue-900/30"
-                              }`}>
-                                <Calendar size={20} className={
+                              <div
+                                className={`p-2 rounded-xl ${
                                   isOverdue
-                                    ? "text-red-600 dark:text-red-400"
-                                    : "text-blue-600 dark:text-blue-400"
-                                } />
+                                    ? "bg-red-100 dark:bg-red-900/30"
+                                    : "bg-blue-100 dark:bg-blue-900/30"
+                                }`}
+                              >
+                                <Calendar
+                                  size={20}
+                                  className={
+                                    isOverdue
+                                      ? "text-red-600 dark:text-red-400"
+                                      : "text-blue-600 dark:text-blue-400"
+                                  }
+                                />
                               </div>
                               <div>
                                 <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
@@ -380,24 +389,33 @@ export default function Exams() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-3">
                             <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                              <Calendar size={18} className="text-blue-600 dark:text-blue-400" />
+                              <Calendar
+                                size={18}
+                                className="text-blue-600 dark:text-blue-400"
+                              />
                               <div>
                                 <p className="text-sm font-medium text-gray-900 dark:text-white">
                                   Exam Date
                                 </p>
                                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {new Date(exam.date).toLocaleDateString('en-US', {
-                                    weekday: 'long',
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric'
-                                  })}
+                                  {new Date(exam.date).toLocaleDateString(
+                                    "en-US",
+                                    {
+                                      weekday: "long",
+                                      year: "numeric",
+                                      month: "long",
+                                      day: "numeric",
+                                    },
+                                  )}
                                 </p>
                               </div>
                             </div>
 
                             <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl">
-                              <Clock size={18} className="text-blue-600 dark:text-blue-400" />
+                              <Clock
+                                size={18}
+                                className="text-blue-600 dark:text-blue-400"
+                              />
                               <div>
                                 <p className="text-sm font-medium text-gray-900 dark:text-white mb-1">
                                   Time Remaining
@@ -451,24 +469,55 @@ export default function Exams() {
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                             {[
-                              { key: 'questionsCollected', label: 'Questions collected', icon: '📝' },
-                              { key: 'ctQuestionsCovered', label: 'CT questions covered', icon: '📋' },
-                              { key: 'booksAndPdfsCollected', label: 'Books & PDFs collected', icon: '📚' },
-                              { key: 'answersReady', label: 'Answers ready', icon: '✅' },
-                              { key: 'fullTopicCovered', label: 'Full topic covered', icon: '🎯' }
+                              {
+                                key: "questionsCollected",
+                                label: "Questions collected",
+                                icon: "📝",
+                              },
+                              {
+                                key: "ctQuestionsCovered",
+                                label: "CT questions covered",
+                                icon: "📋",
+                              },
+                              {
+                                key: "booksAndPdfsCollected",
+                                label: "Books & PDFs collected",
+                                icon: "📚",
+                              },
+                              {
+                                key: "answersReady",
+                                label: "Answers ready",
+                                icon: "✅",
+                              },
+                              {
+                                key: "fullTopicCovered",
+                                label: "Full topic covered",
+                                icon: "🎯",
+                              },
                             ].map((item) => (
-                              <div key={item.key} className="flex items-center gap-3 p-2 rounded-lg bg-white/50 dark:bg-gray-800/50">
+                              <div
+                                key={item.key}
+                                className="flex items-center gap-3 p-2 rounded-lg bg-white/50 dark:bg-gray-800/50"
+                              >
                                 <span className="text-lg">{item.icon}</span>
                                 {exam.readinessCheckboxes?.[item.key] ? (
-                                  <CheckCircle size={16} className="text-green-600 dark:text-green-400 flex-shrink-0" />
+                                  <CheckCircle
+                                    size={16}
+                                    className="text-green-600 dark:text-green-400 flex-shrink-0"
+                                  />
                                 ) : (
-                                  <Circle size={16} className="text-gray-400 flex-shrink-0" />
+                                  <Circle
+                                    size={16}
+                                    className="text-gray-400 flex-shrink-0"
+                                  />
                                 )}
-                                <span className={`text-sm ${
-                                  exam.readinessCheckboxes?.[item.key]
-                                    ? 'text-green-700 dark:text-green-300 line-through'
-                                    : 'text-gray-600 dark:text-gray-400'
-                                }`}>
+                                <span
+                                  className={`text-sm ${
+                                    exam.readinessCheckboxes?.[item.key]
+                                      ? "text-green-700 dark:text-green-300 line-through"
+                                      : "text-gray-600 dark:text-gray-400"
+                                  }`}
+                                >
                                   {item.label}
                                 </span>
                               </div>
@@ -527,10 +576,12 @@ export default function Exams() {
                       </div>
                       <div>
                         <h3 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                          {editingExam ? 'Edit Exam' : 'Add New Exam'}
+                          {editingExam ? "Edit Exam" : "Add New Exam"}
                         </h3>
                         <p className="text-gray-600 dark:text-gray-400">
-                          {editingExam ? 'Update your exam details' : 'Create a new exam entry'}
+                          {editingExam
+                            ? "Update your exam details"
+                            : "Create a new exam entry"}
                         </p>
                       </div>
                     </div>
@@ -547,137 +598,163 @@ export default function Exams() {
                     </motion.button>
                   </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-                        Exam Title
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.title}
-                        onChange={(e) =>
-                          setFormData({ ...formData, title: e.target.value })
-                        }
-                        className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
-                        placeholder="e.g., Midterm Exam"
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-                        Subject
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.subject}
-                        onChange={(e) =>
-                          setFormData({ ...formData, subject: e.target.value })
-                        }
-                        className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
-                        placeholder="e.g., Mathematics"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-                      Exam Date
-                    </label>
-                    <input
-                      type="date"
-                      value={formData.date}
-                      onChange={(e) =>
-                        setFormData({ ...formData, date: e.target.value })
-                      }
-                      className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-                      Topics to Cover
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.topics}
-                      onChange={(e) =>
-                        setFormData({ ...formData, topics: e.target.value })
-                      }
-                      className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
-                      placeholder="e.g., Calculus, Algebra, Geometry"
-                    />
-                  </div>
-
-                  <div className="space-y-4">
-                    <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-                      Preparation Checklist
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800">
-                      {[
-                        { key: 'questionsCollected', label: 'Questions collected', icon: '📝' },
-                        { key: 'ctQuestionsCovered', label: 'CT questions covered', icon: '📋' },
-                        { key: 'booksAndPdfsCollected', label: 'Books & PDFs collected', icon: '📚' },
-                        { key: 'answersReady', label: 'Answers ready', icon: '✅' },
-                        { key: 'fullTopicCovered', label: 'Full topic covered', icon: '🎯' }
-                      ].map((item) => (
-                        <label key={item.key} className="flex items-center gap-3 p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={formData.readinessCheckboxes[item.key]}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                readinessCheckboxes: {
-                                  ...formData.readinessCheckboxes,
-                                  [item.key]: e.target.checked,
-                                },
-                              })
-                            }
-                            className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                          />
-                          <span className="text-lg">{item.icon}</span>
-                          <span className="text-sm font-medium text-gray-900 dark:text-white">
-                            {item.label}
-                          </span>
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                          Exam Title
                         </label>
-                      ))}
+                        <input
+                          type="text"
+                          value={formData.title}
+                          onChange={(e) =>
+                            setFormData({ ...formData, title: e.target.value })
+                          }
+                          className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                          placeholder="e.g., Midterm Exam"
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                          Subject
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.subject}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              subject: e.target.value,
+                            })
+                          }
+                          className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                          placeholder="e.g., Mathematics"
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-                      Additional Notes
-                    </label>
-                    <textarea
-                      value={formData.notes}
-                      onChange={(e) =>
-                        setFormData({ ...formData, notes: e.target.value })
-                      }
-                      className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400 resize-none"
-                      placeholder="Any additional notes or reminders about this exam..."
-                      rows={3}
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                        Exam Date
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.date}
+                        onChange={(e) =>
+                          setFormData({ ...formData, date: e.target.value })
+                        }
+                        className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        required
+                      />
+                    </div>
 
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    type="submit"
-                    className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-lg"
-                  >
-                    {editingExam ? "Update Exam" : "Create Exam"}
-                  </motion.button>
-                </form>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </motion.div>
-    </main>
-  </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                        Topics to Cover
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.topics}
+                        onChange={(e) =>
+                          setFormData({ ...formData, topics: e.target.value })
+                        }
+                        className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400"
+                        placeholder="e.g., Calculus, Algebra, Geometry"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                        Preparation Checklist
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-xl border border-green-200 dark:border-green-800">
+                        {[
+                          {
+                            key: "questionsCollected",
+                            label: "Questions collected",
+                            icon: "📝",
+                          },
+                          {
+                            key: "ctQuestionsCovered",
+                            label: "CT questions covered",
+                            icon: "📋",
+                          },
+                          {
+                            key: "booksAndPdfsCollected",
+                            label: "Books & PDFs collected",
+                            icon: "📚",
+                          },
+                          {
+                            key: "answersReady",
+                            label: "Answers ready",
+                            icon: "✅",
+                          },
+                          {
+                            key: "fullTopicCovered",
+                            label: "Full topic covered",
+                            icon: "🎯",
+                          },
+                        ].map((item) => (
+                          <label
+                            key={item.key}
+                            className="flex items-center gap-3 p-3 bg-white/60 dark:bg-gray-800/60 rounded-lg hover:bg-white/80 dark:hover:bg-gray-700/80 transition-colors cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.readinessCheckboxes[item.key]}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  readinessCheckboxes: {
+                                    ...formData.readinessCheckboxes,
+                                    [item.key]: e.target.checked,
+                                  },
+                                })
+                              }
+                              className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                            />
+                            <span className="text-lg">{item.icon}</span>
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">
+                              {item.label}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                        Additional Notes
+                      </label>
+                      <textarea
+                        value={formData.notes}
+                        onChange={(e) =>
+                          setFormData({ ...formData, notes: e.target.value })
+                        }
+                        className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400 resize-none"
+                        placeholder="Any additional notes or reminders about this exam..."
+                        rows={3}
+                      />
+                    </div>
+
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      type="submit"
+                      className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 font-semibold text-lg"
+                    >
+                      {editingExam ? "Update Exam" : "Create Exam"}
+                    </motion.button>
+                  </form>
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </motion.div>
+      </main>
+    </div>
   );
 }
