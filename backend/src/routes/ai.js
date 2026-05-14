@@ -1,14 +1,30 @@
 const express = require("express");
 const router = express.Router();
 const protect = require("../middleware/auth");
-const OpenAI = require("openai");
 
-// Initialize OpenAI (will use environment variable if available)
-const openai = process.env.OPENAI_API_KEY
-  ? new OpenAI({
+// Initialize AI service (Gemini preferred, fallback to OpenAI)
+let aiService = null;
+let serviceType = 'none';
+
+if (process.env.GEMINI_API_KEY) {
+  try {
+    const { GoogleGenerativeAI } = require("@google/generative-ai");
+    aiService = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    serviceType = 'gemini';
+  } catch (error) {
+    console.error("Failed to initialize Gemini:", error);
+  }
+} else if (process.env.OPENAI_API_KEY) {
+  try {
+    const OpenAI = require("openai");
+    aiService = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
-    })
-  : null;
+    });
+    serviceType = 'openai';
+  } catch (error) {
+    console.error("Failed to initialize OpenAI:", error);
+  }
+}
 
 // @route   POST /api/ai/chat
 // @desc    AI chat assistant
@@ -17,7 +33,7 @@ router.post("/chat", protect, async (req, res) => {
   try {
     const { message, context, messages } = req.body;
 
-    if (!openai) {
+    if (!aiService) {
       const text = String(message || "").toLowerCase();
       
       // Study routine requests
@@ -54,38 +70,67 @@ router.post("/chat", protect, async (req, res) => {
       });
     }
 
-    const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
-    const trimmedMessages = Array.isArray(messages)
-      ? messages
-          .filter(
-            (m) =>
-              m && (m.role === "user" || m.role === "assistant") && m.content,
-          )
-          .slice(-10)
-      : [];
-    const conversation =
-      trimmedMessages.length > 0
-        ? trimmedMessages
-        : [{ role: "user", content: message }];
+    // Use Gemini or OpenAI based on what's available
+    if (serviceType === 'gemini') {
+      const model = aiService.getGenerativeModel({ model: "gemini-1.5-flash" });
+      
+      const trimmedMessages = Array.isArray(messages)
+        ? messages
+            .filter(
+              (m) =>
+                m && (m.role === "user" || m.role === "assistant") && m.content,
+            )
+            .slice(-10)
+        : [];
+      
+      const conversation = trimmedMessages.length > 0
+        ? trimmedMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n\n')
+        : message;
 
-    const completion = await openai.chat.completions.create({
-      model,
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are StudentOS AI Assistant. Provide clear, accurate, and practical help for students. Ask clarifying questions when needed. Use concise steps, examples, and avoid fluff. If asked for calculations, request the required numbers. If a request is ambiguous, ask one short follow-up question.",
-        },
-        ...(context
-          ? [{ role: "system", content: `Context: ${String(context)}` }]
-          : []),
-        ...conversation,
-      ],
-      max_tokens: 700,
-      temperature: 0.4,
-    });
+      const prompt = `You are StudentOS AI Assistant. Provide clear, accurate, and practical help for students. Ask clarifying questions when needed. Use concise steps, examples, and avoid fluff. If asked for calculations, request the required numbers. If a request is ambiguous, ask one short follow-up question.
 
-    res.json({ response: completion.choices[0].message.content });
+${context ? `Context: ${String(context)}` : ''}
+
+${conversation}`;
+
+      const result = await model.generateContent(prompt);
+      const response = result.response.text();
+      
+      res.json({ response });
+    } else if (serviceType === 'openai') {
+      const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+      const trimmedMessages = Array.isArray(messages)
+        ? messages
+            .filter(
+              (m) =>
+                m && (m.role === "user" || m.role === "assistant") && m.content,
+            )
+            .slice(-10)
+        : [];
+      const conversation =
+        trimmedMessages.length > 0
+          ? trimmedMessages
+          : [{ role: "user", content: message }];
+
+      const completion = await aiService.chat.completions.create({
+        model,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are StudentOS AI Assistant. Provide clear, accurate, and practical help for students. Ask clarifying questions when needed. Use concise steps, examples, and avoid fluff. If asked for calculations, request the required numbers. If a request is ambiguous, ask one short follow-up question.",
+          },
+          ...(context
+            ? [{ role: "system", content: `Context: ${String(context)}` }]
+            : []),
+          ...conversation,
+        ],
+        max_tokens: 700,
+        temperature: 0.4,
+      });
+
+      res.json({ response: completion.choices[0].message.content });
+    }
   } catch (error) {
     console.error("AI Error:", error);
     res.status(500).json({ message: "AI service unavailable" });
