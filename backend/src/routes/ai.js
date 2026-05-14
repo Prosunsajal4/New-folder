@@ -154,9 +154,8 @@ router.post("/chat", protect, async (req, res) => {
     } else if (serviceType === "gemini") {
       try {
         console.log("Using Gemini AI service");
-        // Try multiple model names as Gemini API has different available models
-        // Using generateContent which works with text-only models
-        const models = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro", "gemini-2.0-flash"];
+        // Try models in order of preference (newest/most available first)
+        const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"];
         let model = null;
         let lastError = null;
 
@@ -164,16 +163,16 @@ router.post("/chat", protect, async (req, res) => {
           try {
             console.log("Attempting to load model:", modelName);
             model = aiService.getGenerativeModel({ model: modelName });
-            console.log("✅ Successfully loaded model:", modelName);
+            console.log("✅ Successfully created model instance:", modelName);
             break;
           } catch (e) {
             lastError = e;
-            console.warn("❌ Model not available:", modelName);
+            console.warn("❌ Failed to create model:", modelName, "-", e.message?.substring(0, 80));
           }
         }
 
         if (!model) {
-          throw new Error("No Gemini models available. Last error: " + lastError?.message?.substring(0, 100));
+          throw new Error("Cannot create Gemini model. Tried: " + models.join(", "));
         }
 
         const trimmedMessages = Array.isArray(messages)
@@ -201,7 +200,7 @@ ${context ? `Context: ${String(context)}` : ""}
 
 ${conversation}`;
 
-        console.log("Calling Gemini API...");
+        console.log("Calling Gemini generateContent API...");
         const result = await model.generateContent(prompt);
         const response = result.response.text();
         console.log("✅ Gemini response received, length:", response?.length);
