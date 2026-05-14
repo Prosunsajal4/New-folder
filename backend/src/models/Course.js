@@ -83,6 +83,8 @@ courseSchema.virtual('attendanceStats').get(function () {
   };
 });
 
+courseSchema.set('toJSON', { virtuals: true });
+
 courseSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();

@@ -28,7 +28,7 @@ export default function Attendance() {
   const [predictions, setPredictions] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [saving, setSaving] = useState(false);
-  const refreshIntervalMs = 30000;
+  const refreshIntervalMs = 10000;
 
   const [newCourse, setNewCourse] = useState({
     name: "",
@@ -120,12 +120,9 @@ export default function Attendance() {
 
     try {
       await axios.put(`/courses/${selectedCourse._id}`, updatedCourse);
-      setSelectedCourse(updatedCourse);
-      setCourses(
-        courses.map((c) => (c._id === selectedCourse._id ? updatedCourse : c)),
-      );
+      // Instead of updating local state, fetch fresh data
+      await fetchCourses({ silent: true });
       toast.success("Attendance updated");
-      fetchCourses({ silent: true });
     } catch (error) {
       toast.error("Failed to update attendance");
       console.error(error);
