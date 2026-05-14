@@ -27,7 +27,7 @@ export default function Dashboard() {
   const [chartData, setChartData] = useState(null);
   const [deadlines, setDeadlines] = useState(null);
   const [loadingStats, setLoadingStats] = useState(true);
-  const refreshIntervalMs = 30000;
+  const refreshIntervalMs = 10000;
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {

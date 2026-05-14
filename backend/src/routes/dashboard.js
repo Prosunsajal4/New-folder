@@ -17,20 +17,23 @@ router.get('/stats', protect, async (req, res) => {
     // Get courses and calculate overall attendance
     const courses = await Course.find({ user: userId });
     let totalAttendance = 0;
-    let totalClasses = 0;
-    let totalAttended = 0;
+    let courseCount = 0;
 
     courses.forEach(course => {
       const sectionAAttended = course.sectionA.attended.length;
       const sectionBAttended = course.sectionB.attended.length;
       const totalCourseClasses = course.sectionA.totalClasses + course.sectionB.totalClasses;
       const totalCourseAttended = sectionAAttended + sectionBAttended;
-
-      totalClasses += totalCourseClasses;
-      totalAttended += totalCourseAttended;
+      
+      if (totalCourseClasses > 0) {
+        const courseAttendance = (totalCourseAttended / totalCourseClasses) * 100;
+        totalAttendance += courseAttendance;
+        courseCount++;
+      }
     });
 
-    totalAttendance = totalClasses > 0 ? (totalAttended / totalClasses) * 100 : 0;
+    // Calculate average attendance across all courses
+    totalAttendance = courseCount > 0 ? totalAttendance / courseCount : 0;
 
     // Get assignments
     const assignments = await Assignment.find({ user: userId });
