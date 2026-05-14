@@ -1,16 +1,18 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Course = require('../models/Course');
-const protect = require('../middleware/auth');
+const Course = require("../models/Course");
+const protect = require("../middleware/auth");
 
 // @route   GET /api/courses
 // @desc    Get all courses for a user
 // @access  Private
-router.get('/', protect, async (req, res) => {
+router.get("/", protect, async (req, res) => {
   try {
-    const courses = await Course.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const courses = await Course.find({ user: req.user._id }).sort({
+      createdAt: -1,
+    });
     // Ensure virtuals are included
-    const coursesWithStats = courses.map(course => course.toJSON());
+    const coursesWithStats = courses.map((course) => course.toJSON());
     res.json(coursesWithStats);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -20,7 +22,7 @@ router.get('/', protect, async (req, res) => {
 // @route   POST /api/courses
 // @desc    Create a new course
 // @access  Private
-router.post('/', protect, async (req, res) => {
+router.post("/", protect, async (req, res) => {
   try {
     const course = await Course.create({
       user: req.user._id,
@@ -35,16 +37,16 @@ router.post('/', protect, async (req, res) => {
 // @route   PUT /api/courses/:id
 // @desc    Update a course
 // @access  Private
-router.put('/:id', protect, async (req, res) => {
+router.put("/:id", protect, async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
-    
+
     if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
+      return res.status(404).json({ message: "Course not found" });
     }
 
     if (course.user.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: 'Not authorized' });
+      return res.status(401).json({ message: "Not authorized" });
     }
 
     Object.assign(course, req.body);
@@ -58,20 +60,20 @@ router.put('/:id', protect, async (req, res) => {
 // @route   DELETE /api/courses/:id
 // @desc    Delete a course
 // @access  Private
-router.delete('/:id', protect, async (req, res) => {
+router.delete("/:id", protect, async (req, res) => {
   try {
     const course = await Course.findById(req.params.id);
-    
+
     if (!course) {
-      return res.status(404).json({ message: 'Course not found' });
+      return res.status(404).json({ message: "Course not found" });
     }
 
     if (course.user.toString() !== req.user._id.toString()) {
-      return res.status(401).json({ message: 'Not authorized' });
+      return res.status(401).json({ message: "Not authorized" });
     }
 
     await course.deleteOne();
-    res.json({ message: 'Course deleted' });
+    res.json({ message: "Course deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -1,6 +1,6 @@
 # StudentOS - AI-Powered Student Productivity App
 
-A full-stack AI-powered student productivity web application built with Next.js, Express.js, MongoDB, and OpenAI API.
+A full-stack AI-powered student productivity web application built with Next.js, Express.js, MongoDB, and Google Gemini AI.
 
 ## Features
 

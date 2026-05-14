@@ -4,13 +4,13 @@ const protect = require("../middleware/auth");
 
 // Initialize AI service (Gemini preferred, fallback to OpenAI)
 let aiService = null;
-let serviceType = 'none';
+let serviceType = "none";
 
 if (process.env.GEMINI_API_KEY) {
   try {
     const { GoogleGenerativeAI } = require("@google/generative-ai");
     aiService = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    serviceType = 'gemini';
+    serviceType = "gemini";
   } catch (error) {
     console.error("Failed to initialize Gemini:", error);
   }
@@ -20,7 +20,7 @@ if (process.env.GEMINI_API_KEY) {
     aiService = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
-    serviceType = 'openai';
+    serviceType = "openai";
   } catch (error) {
     console.error("Failed to initialize OpenAI:", error);
   }
@@ -35,45 +35,67 @@ router.post("/chat", protect, async (req, res) => {
 
     if (!aiService) {
       const text = String(message || "").toLowerCase();
-      
+
       // Study routine requests
-      if (text.includes("routine") || text.includes("schedule") || text.includes("plan")) {
+      if (
+        text.includes("routine") ||
+        text.includes("schedule") ||
+        text.includes("plan")
+      ) {
         return res.json({
-          response: "Here's a balanced daily study routine:\n\n📚 **Morning (9-11 AM):** Review yesterday's notes (45 min) + Light exercise\n\n🎯 **Midday (12-3 PM):** 2 focused study blocks (45 min each) with 10 min breaks\n\n📝 **Afternoon (4-6 PM):** Practice problems/assignments (60 min) + Short break\n\n🔄 **Evening (7-9 PM):** Quick review + Plan tomorrow's priorities\n\n💤 **Night:** Relax 30 min before bed\n\n💡 **Tips:** Use Pomodoro (25 min study + 5 min break), stay hydrated, and get 7-8 hours sleep. Want me to customize this for your subjects?",
+          response:
+            "Here's a balanced daily study routine:\n\n📚 **Morning (9-11 AM):** Review yesterday's notes (45 min) + Light exercise\n\n🎯 **Midday (12-3 PM):** 2 focused study blocks (45 min each) with 10 min breaks\n\n📝 **Afternoon (4-6 PM):** Practice problems/assignments (60 min) + Short break\n\n🔄 **Evening (7-9 PM):** Quick review + Plan tomorrow's priorities\n\n💤 **Night:** Relax 30 min before bed\n\n💡 **Tips:** Use Pomodoro (25 min study + 5 min break), stay hydrated, and get 7-8 hours sleep. Want me to customize this for your subjects?",
         });
       }
-      
+
       // Attendance calculations
-      if (text.includes("attendance") || text.includes("miss") || text.includes("safe")) {
+      if (
+        text.includes("attendance") ||
+        text.includes("miss") ||
+        text.includes("safe")
+      ) {
         return res.json({
-          response: "I can help calculate attendance! Please provide:\n- Total classes held\n- Classes you've attended\n- Required attendance percentage (usually 75-80%)\n\nExample: 'I have 50 total classes, attended 40, need 75% minimum'\n\nI'll tell you how many more classes you can miss safely!",
+          response:
+            "I can help calculate attendance! Please provide:\n- Total classes held\n- Classes you've attended\n- Required attendance percentage (usually 75-80%)\n\nExample: 'I have 50 total classes, attended 40, need 75% minimum'\n\nI'll tell you how many more classes you can miss safely!",
         });
       }
-      
+
       // Explanations
-      if (text.includes("explain") || text.includes("what") || text.includes("how")) {
+      if (
+        text.includes("explain") ||
+        text.includes("what") ||
+        text.includes("how")
+      ) {
         return res.json({
-          response: "I'll explain concepts step-by-step! Please tell me:\n- The specific topic/subject\n- Your current level (beginner/intermediate/advanced)\n- What you already understand\n\nFor example: 'Explain calculus derivatives, I'm intermediate level'",
+          response:
+            "I'll explain concepts step-by-step! Please tell me:\n- The specific topic/subject\n- Your current level (beginner/intermediate/advanced)\n- What you already understand\n\nFor example: 'Explain calculus derivatives, I'm intermediate level'",
         });
       }
-      
+
       // Study tips and productivity
-      if (text.includes("tip") || text.includes("productivity") || text.includes("focus") || text.includes("study")) {
+      if (
+        text.includes("tip") ||
+        text.includes("productivity") ||
+        text.includes("focus") ||
+        text.includes("study")
+      ) {
         return res.json({
-          response: "Here are proven study tips:\n\n🎯 **Active Recall:** Test yourself instead of re-reading\n\n📝 **Spaced Repetition:** Review material over increasing intervals\n\n🧠 **Feynman Technique:** Explain concepts in simple terms\n\n⏰ **Pomodoro:** 25 min focused work + 5 min break\n\n📚 **Environment:** Quiet, well-lit space with no distractions\n\n💡 **Sleep & Nutrition:** 7-8 hours sleep + healthy meals\n\nWant tips for a specific subject or issue?",
+          response:
+            "Here are proven study tips:\n\n🎯 **Active Recall:** Test yourself instead of re-reading\n\n📝 **Spaced Repetition:** Review material over increasing intervals\n\n🧠 **Feynman Technique:** Explain concepts in simple terms\n\n⏰ **Pomodoro:** 25 min focused work + 5 min break\n\n📚 **Environment:** Quiet, well-lit space with no distractions\n\n💡 **Sleep & Nutrition:** 7-8 hours sleep + healthy meals\n\nWant tips for a specific subject or issue?",
         });
       }
-      
+
       // Default helpful response
       return res.json({
-        response: "I'm your AI study assistant! I can help with:\n\n📚 Study planning and routines\n📊 Attendance calculations\n📝 Concept explanations\n💡 Productivity tips\n🎯 Goal setting\n\nWhat would you like help with? Be specific for better assistance!",
+        response:
+          "I'm your AI study assistant! I can help with:\n\n📚 Study planning and routines\n📊 Attendance calculations\n📝 Concept explanations\n💡 Productivity tips\n🎯 Goal setting\n\nWhat would you like help with? Be specific for better assistance!",
       });
     }
 
     // Use Gemini or OpenAI based on what's available
-    if (serviceType === 'gemini') {
+    if (serviceType === "gemini") {
       const model = aiService.getGenerativeModel({ model: "gemini-1.5-flash" });
-      
+
       const trimmedMessages = Array.isArray(messages)
         ? messages
             .filter(
@@ -82,22 +104,28 @@ router.post("/chat", protect, async (req, res) => {
             )
             .slice(-10)
         : [];
-      
-      const conversation = trimmedMessages.length > 0
-        ? trimmedMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n\n')
-        : message;
+
+      const conversation =
+        trimmedMessages.length > 0
+          ? trimmedMessages
+              .map(
+                (m) =>
+                  `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`,
+              )
+              .join("\n\n")
+          : message;
 
       const prompt = `You are StudentOS AI Assistant. Provide clear, accurate, and practical help for students. Ask clarifying questions when needed. Use concise steps, examples, and avoid fluff. If asked for calculations, request the required numbers. If a request is ambiguous, ask one short follow-up question.
 
-${context ? `Context: ${String(context)}` : ''}
+${context ? `Context: ${String(context)}` : ""}
 
 ${conversation}`;
 
       const result = await model.generateContent(prompt);
       const response = result.response.text();
-      
+
       res.json({ response });
-    } else if (serviceType === 'openai') {
+    } else if (serviceType === "openai") {
       const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
       const trimmedMessages = Array.isArray(messages)
         ? messages

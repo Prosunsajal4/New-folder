@@ -1,14 +1,14 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const courseSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   name: {
     type: String,
-    required: [true, 'Please add a course name'],
+    required: [true, "Please add a course name"],
     trim: true,
   },
   sectionA: {
@@ -42,24 +42,28 @@ const courseSchema = new mongoose.Schema({
 });
 
 // Calculate attendance statistics
-courseSchema.virtual('attendanceStats').get(function () {
+courseSchema.virtual("attendanceStats").get(function () {
   const sectionAAttended = this.sectionA.attended.length;
   const sectionBAttended = this.sectionB.attended.length;
-  const sectionAPercentage = (sectionAAttended / this.sectionA.totalClasses) * 100;
-  const sectionBPercentage = (sectionBAttended / this.sectionB.totalClasses) * 100;
+  const sectionAPercentage =
+    (sectionAAttended / this.sectionA.totalClasses) * 100;
+  const sectionBPercentage =
+    (sectionBAttended / this.sectionB.totalClasses) * 100;
   const totalAttended = sectionAAttended + sectionBAttended;
   const totalClasses = this.sectionA.totalClasses + this.sectionB.totalClasses;
   const totalPercentage = (totalAttended / totalClasses) * 100;
-  
+
   // Section marks (5 marks each)
   const sectionAMarks = (sectionAPercentage / 100) * 5;
   const sectionBMarks = (sectionBPercentage / 100) * 5;
   const totalMarks = sectionAMarks + sectionBMarks;
-  
+
   // Safe absences calculation (assuming 80% is safe)
   const requiredAttendance = totalClasses * 0.8;
-  const safeAbsences = Math.floor(totalClasses - requiredAttendance - (totalClasses - totalAttended));
-  
+  const safeAbsences = Math.floor(
+    totalClasses - requiredAttendance - (totalClasses - totalAttended),
+  );
+
   return {
     sectionA: {
       attended: sectionAAttended,
@@ -83,11 +87,11 @@ courseSchema.virtual('attendanceStats').get(function () {
   };
 });
 
-courseSchema.set('toJSON', { virtuals: true });
+courseSchema.set("toJSON", { virtuals: true });
 
-courseSchema.pre('save', function (next) {
+courseSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
-module.exports = mongoose.model('Course', courseSchema);
+module.exports = mongoose.model("Course", courseSchema);

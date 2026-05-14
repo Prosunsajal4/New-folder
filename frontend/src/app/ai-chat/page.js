@@ -63,7 +63,8 @@ export default function AIChat() {
         ...prev,
         {
           role: "assistant",
-          content: "Sorry, I'm having trouble connecting right now. Please check your internet connection and try again in a moment.",
+          content:
+            "Sorry, I'm having trouble connecting right now. Please check your internet connection and try again in a moment.",
         },
       ]);
     } finally {

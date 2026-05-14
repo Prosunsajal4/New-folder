@@ -35,10 +35,13 @@ export default function Attendance() {
 
     const sectionAAttended = course.sectionA.attended.length;
     const sectionBAttended = course.sectionB.attended.length;
-    const sectionAPercentage = (sectionAAttended / course.sectionA.totalClasses) * 100;
-    const sectionBPercentage = (sectionBAttended / course.sectionB.totalClasses) * 100;
+    const sectionAPercentage =
+      (sectionAAttended / course.sectionA.totalClasses) * 100;
+    const sectionBPercentage =
+      (sectionBAttended / course.sectionB.totalClasses) * 100;
     const totalAttended = sectionAAttended + sectionBAttended;
-    const totalClasses = course.sectionA.totalClasses + course.sectionB.totalClasses;
+    const totalClasses =
+      course.sectionA.totalClasses + course.sectionB.totalClasses;
     const totalPercentage = (totalAttended / totalClasses) * 100;
 
     // Section marks (5 marks each)
@@ -48,7 +51,12 @@ export default function Attendance() {
 
     // Safe absences calculation (assuming 80% is safe)
     const requiredAttendance = totalClasses * 0.8;
-    const safeAbsences = Math.max(0, Math.floor(totalClasses - requiredAttendance - (totalClasses - totalAttended)));
+    const safeAbsences = Math.max(
+      0,
+      Math.floor(
+        totalClasses - requiredAttendance - (totalClasses - totalAttended),
+      ),
+    );
 
     return {
       sectionA: {
