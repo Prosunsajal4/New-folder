@@ -2,24 +2,16 @@ const express = require("express");
 const router = express.Router();
 const protect = require("../middleware/auth");
 
-// Initialize AI service (Gemini preferred, fallback to OpenAI)
+// Initialize AI service (OpenAI preferred, fallback to Gemini)
 let aiService = null;
 let serviceType = "none";
 
 console.log("Initializing AI service...");
-console.log("Environment check - GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "SET" : "NOT SET");
 console.log("Environment check - OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "SET" : "NOT SET");
+console.log("Environment check - GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "SET" : "NOT SET");
 
-if (process.env.GEMINI_API_KEY) {
-  try {
-    const { GoogleGenerativeAI } = require("@google/generative-ai");
-    aiService = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    serviceType = "gemini";
-    console.log("✅ Gemini AI service initialized successfully");
-  } catch (error) {
-    console.error("❌ Failed to initialize Gemini:", error.message);
-  }
-} else if (process.env.OPENAI_API_KEY) {
+// Try OpenAI first (more reliable)
+if (process.env.OPENAI_API_KEY) {
   try {
     const OpenAI = require("openai");
     aiService = new OpenAI({
@@ -30,7 +22,21 @@ if (process.env.GEMINI_API_KEY) {
   } catch (error) {
     console.error("❌ Failed to initialize OpenAI:", error.message);
   }
-} else {
+}
+
+// Fall back to Gemini if OpenAI not available
+if (!aiService && process.env.GEMINI_API_KEY) {
+  try {
+    const { GoogleGenerativeAI } = require("@google/generative-ai");
+    aiService = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    serviceType = "gemini";
+    console.log("✅ Gemini AI service initialized successfully");
+  } catch (error) {
+    console.error("❌ Failed to initialize Gemini:", error.message);
+  }
+} 
+
+if (!aiService) {
   console.warn("⚠️  No AI API keys found - will use fallback responses only");
 }
 
@@ -102,12 +108,71 @@ router.post("/chat", protect, async (req, res) => {
       });
     }
 
-    // Use Gemini or OpenAI based on what's available
-    if (serviceType === "gemini") {
+    // Use OpenAI or Gemini based on what's available
+    if (serviceType === "openai") {
+      try {
+        console.log("Using OpenAI service");
+        const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
+        const trimmedMessages = Array.isArray(messages)
+          ? messages
+              .filter(
+                (m) =>
+                  m && (m.role === "user" || m.role === "assistant") && m.content,
+              )
+              .slice(-10)
+          : [];
+        const conversation =
+          trimmedMessages.length > 0
+            ? trimmedMessages
+            : [{ role: "user", content: message }];
+
+        console.log("Calling OpenAI API...");
+        const completion = await aiService.chat.completions.create({
+          model,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are StudentOS AI Assistant. You are helpful, friendly, and expert in student productivity, study techniques, time management, and academic planning. Provide clear, practical advice with examples. Ask clarifying questions when needed. Keep responses concise but thorough.",
+            },
+            ...(context
+              ? [{ role: "system", content: `Context: ${String(context)}` }]
+              : []),
+            ...conversation,
+          ],
+          max_tokens: 800,
+          temperature: 0.7,
+        });
+
+        const response = completion.choices[0].message.content;
+        console.log("OpenAI response received, length:", response?.length);
+        res.json({ response });
+      } catch (openaiError) {
+        console.warn("OpenAI API failed:", openaiError.message);
+        return res.status(500).json({ message: "AI service error: " + openaiError.message });
+      }
+    } else if (serviceType === "gemini") {
       try {
         console.log("Using Gemini AI service");
-        // Use gemini-pro which is widely available and stable
-        const model = aiService.getGenerativeModel({ model: "gemini-pro" });
+        // Try multiple model names as Gemini has changed API
+        const models = ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-pro"];
+        let model = null;
+        let lastError = null;
+
+        for (const modelName of models) {
+          try {
+            model = aiService.getGenerativeModel({ model: modelName });
+            console.log("Successfully loaded model:", modelName);
+            break;
+          } catch (e) {
+            lastError = e;
+            console.warn("Model not available:", modelName, e.message?.substring(0, 100));
+          }
+        }
+
+        if (!model) {
+          throw new Error("No Gemini models available: " + lastError?.message);
+        }
 
         const trimmedMessages = Array.isArray(messages)
           ? messages
@@ -128,7 +193,7 @@ router.post("/chat", protect, async (req, res) => {
                 .join("\n\n")
             : message;
 
-        const prompt = `You are StudentOS AI Assistant. Provide clear, accurate, and practical help for students. Ask clarifying questions when needed. Use concise steps, examples, and avoid fluff. If asked for calculations, request the required numbers. If a request is ambiguous, ask one short follow-up question.
+        const prompt = `You are StudentOS AI Assistant. You are helpful, friendly, and expert in student productivity, study techniques, time management, and academic planning. Provide clear, practical advice with examples. Ask clarifying questions when needed. Keep responses concise but thorough.
 
 ${context ? `Context: ${String(context)}` : ""}
 
@@ -138,61 +203,14 @@ ${conversation}`;
         const result = await model.generateContent(prompt);
         const response = result.response.text();
         console.log("Gemini response received, length:", response?.length);
-
         res.json({ response });
       } catch (geminiError) {
         console.warn("Gemini API failed:", geminiError.message);
-        console.log("Falling back to built-in responses");
-        // Fall back to built-in responses
-        const text = String(message || "").toLowerCase();
-        
-        if (text.includes("routine") || text.includes("schedule") || text.includes("plan")) {
-          return res.json({
-            response: "Here's a balanced daily study routine:\n\n📚 **Morning (9-11 AM):** Review yesterday's notes (45 min) + Light exercise\n\n🎯 **Midday (12-3 PM):** 2 focused study blocks (45 min each) with 10 min breaks\n\n📝 **Afternoon (4-6 PM):** Practice problems/assignments (60 min) + Short break\n\n🔄 **Evening (7-9 PM):** Quick review + Plan tomorrow's priorities\n\n💤 **Night:** Relax 30 min before bed\n\n💡 **Tips:** Use Pomodoro (25 min study + 5 min break), stay hydrated, and get 7-8 hours sleep. Want me to customize this for your subjects?",
-          });
-        }
-        
-        return res.json({
-          response: "I'm your AI study assistant! I can help with:\n\n📚 Study planning and routines\n📊 Attendance calculations\n📝 Concept explanations\n💡 Productivity tips\n🎯 Goal setting\n\nWhat would you like help with? Be specific for better assistance!",
-        });
+        return res.status(500).json({ message: "AI service error: " + geminiError.message });
       }
-    } else if (serviceType === "openai") {
-      console.log("Using OpenAI service");
-      const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
-      const trimmedMessages = Array.isArray(messages)
-        ? messages
-            .filter(
-              (m) =>
-                m && (m.role === "user" || m.role === "assistant") && m.content,
-            )
-            .slice(-10)
-        : [];
-      const conversation =
-        trimmedMessages.length > 0
-          ? trimmedMessages
-          : [{ role: "user", content: message }];
-
-      const completion = await aiService.chat.completions.create({
-        model,
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are StudentOS AI Assistant. Provide clear, accurate, and practical help for students. Ask clarifying questions when needed. Use concise steps, examples, and avoid fluff. If asked for calculations, request the required numbers. If a request is ambiguous, ask one short follow-up question.",
-          },
-          ...(context
-            ? [{ role: "system", content: `Context: ${String(context)}` }]
-            : []),
-          ...conversation,
-        ],
-        max_tokens: 700,
-        temperature: 0.4,
-      });
-
-      res.json({ response: completion.choices[0].message.content });
     } else {
       console.warn("No AI service available (serviceType:", serviceType, ")");
-      res.status(500).json({ message: "AI service unavailable" });
+      res.status(500).json({ message: "AI service unavailable - no API keys configured" });
     }
   } catch (error) {
     console.error("AI Error details:", {
