@@ -126,7 +126,7 @@ router.post("/chat", protect, async (req, res) => {
             ? trimmedMessages
             : [{ role: "user", content: message }];
 
-        console.log("Calling OpenAI API...");
+        console.log("Calling OpenAI API with model:", model);
         const completion = await aiService.chat.completions.create({
           model,
           messages: [
@@ -148,30 +148,32 @@ router.post("/chat", protect, async (req, res) => {
         console.log("OpenAI response received, length:", response?.length);
         res.json({ response });
       } catch (openaiError) {
-        console.warn("OpenAI API failed:", openaiError.message);
+        console.error("OpenAI API error:", openaiError.message);
         return res.status(500).json({ message: "AI service error: " + openaiError.message });
       }
     } else if (serviceType === "gemini") {
       try {
         console.log("Using Gemini AI service");
-        // Try multiple model names as Gemini has changed API
-        const models = ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-pro"];
+        // Try multiple model names as Gemini API has different available models
+        // Using generateContent which works with text-only models
+        const models = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro", "gemini-2.0-flash"];
         let model = null;
         let lastError = null;
 
         for (const modelName of models) {
           try {
+            console.log("Attempting to load model:", modelName);
             model = aiService.getGenerativeModel({ model: modelName });
-            console.log("Successfully loaded model:", modelName);
+            console.log("✅ Successfully loaded model:", modelName);
             break;
           } catch (e) {
             lastError = e;
-            console.warn("Model not available:", modelName, e.message?.substring(0, 100));
+            console.warn("❌ Model not available:", modelName);
           }
         }
 
         if (!model) {
-          throw new Error("No Gemini models available: " + lastError?.message);
+          throw new Error("No Gemini models available. Last error: " + lastError?.message?.substring(0, 100));
         }
 
         const trimmedMessages = Array.isArray(messages)
@@ -202,14 +204,14 @@ ${conversation}`;
         console.log("Calling Gemini API...");
         const result = await model.generateContent(prompt);
         const response = result.response.text();
-        console.log("Gemini response received, length:", response?.length);
+        console.log("✅ Gemini response received, length:", response?.length);
         res.json({ response });
       } catch (geminiError) {
-        console.warn("Gemini API failed:", geminiError.message);
+        console.error("❌ Gemini API error:", geminiError.message);
         return res.status(500).json({ message: "AI service error: " + geminiError.message });
       }
     } else {
-      console.warn("No AI service available (serviceType:", serviceType, ")");
+      console.error("No AI service available (serviceType:", serviceType, ")");
       res.status(500).json({ message: "AI service unavailable - no API keys configured" });
     }
   } catch (error) {
