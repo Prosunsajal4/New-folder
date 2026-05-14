@@ -9,7 +9,9 @@ const protect = require('../middleware/auth');
 router.get('/', protect, async (req, res) => {
   try {
     const courses = await Course.find({ user: req.user._id }).sort({ createdAt: -1 });
-    res.json(courses);
+    // Ensure virtuals are included
+    const coursesWithStats = courses.map(course => course.toJSON());
+    res.json(coursesWithStats);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -24,7 +26,7 @@ router.post('/', protect, async (req, res) => {
       user: req.user._id,
       ...req.body,
     });
-    res.status(201).json(course);
+    res.status(201).json(course.toJSON());
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -47,7 +49,7 @@ router.put('/:id', protect, async (req, res) => {
 
     Object.assign(course, req.body);
     await course.save();
-    res.json(course);
+    res.json(course.toJSON());
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
