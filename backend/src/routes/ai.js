@@ -6,13 +6,18 @@ const protect = require("../middleware/auth");
 let aiService = null;
 let serviceType = "none";
 
+console.log("Initializing AI service...");
+console.log("Environment check - GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "SET" : "NOT SET");
+console.log("Environment check - OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "SET" : "NOT SET");
+
 if (process.env.GEMINI_API_KEY) {
   try {
     const { GoogleGenerativeAI } = require("@google/generative-ai");
     aiService = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     serviceType = "gemini";
+    console.log("✅ Gemini AI service initialized successfully");
   } catch (error) {
-    console.error("Failed to initialize Gemini:", error);
+    console.error("❌ Failed to initialize Gemini:", error.message);
   }
 } else if (process.env.OPENAI_API_KEY) {
   try {
@@ -21,9 +26,12 @@ if (process.env.GEMINI_API_KEY) {
       apiKey: process.env.OPENAI_API_KEY,
     });
     serviceType = "openai";
+    console.log("✅ OpenAI service initialized successfully");
   } catch (error) {
-    console.error("Failed to initialize OpenAI:", error);
+    console.error("❌ Failed to initialize OpenAI:", error.message);
   }
+} else {
+  console.warn("⚠️  No AI API keys found - will use fallback responses only");
 }
 
 // @route   POST /api/ai/chat
@@ -32,8 +40,10 @@ if (process.env.GEMINI_API_KEY) {
 router.post("/chat", protect, async (req, res) => {
   try {
     const { message, context, messages } = req.body;
+    console.log("AI Chat request received:", { message: message?.substring(0, 50), serviceType });
 
     if (!aiService) {
+      console.log("No AI service initialized, using fallback responses");
       const text = String(message || "").toLowerCase();
 
       // Study routine requests
@@ -94,6 +104,7 @@ router.post("/chat", protect, async (req, res) => {
 
     // Use Gemini or OpenAI based on what's available
     if (serviceType === "gemini") {
+      console.log("Using Gemini AI service");
       const model = aiService.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const trimmedMessages = Array.isArray(messages)
@@ -121,11 +132,14 @@ ${context ? `Context: ${String(context)}` : ""}
 
 ${conversation}`;
 
+      console.log("Calling Gemini API...");
       const result = await model.generateContent(prompt);
       const response = result.response.text();
+      console.log("Gemini response received, length:", response?.length);
 
       res.json({ response });
     } else if (serviceType === "openai") {
+      console.log("Using OpenAI service");
       const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
       const trimmedMessages = Array.isArray(messages)
         ? messages
@@ -158,9 +172,18 @@ ${conversation}`;
       });
 
       res.json({ response: completion.choices[0].message.content });
+    } else {
+      console.warn("No AI service available (serviceType:", serviceType, ")");
+      res.status(500).json({ message: "AI service unavailable" });
     }
   } catch (error) {
-    console.error("AI Error:", error);
+    console.error("AI Error details:", {
+      message: error.message,
+      name: error.name,
+      status: error.status,
+      code: error.code,
+      stack: error.stack?.substring(0, 500),
+    });
     res.status(500).json({ message: "AI service unavailable" });
   }
 });
