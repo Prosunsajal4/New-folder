@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useRouter } from 'next/navigation';
-import Sidebar from '../../components/Sidebar';
-import axios from '../../lib/axios';
-import { motion } from 'framer-motion';
-import { Plus, Edit2, Trash2, Search, FileText, Tag } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
+import Sidebar from "../../components/Sidebar";
+import axios from "../../lib/axios";
+import { motion } from "framer-motion";
+import { Plus, Edit2, Trash2, Search, FileText, Tag } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import toast from "react-hot-toast";
 
 export default function Notes() {
   const { isAuthenticated, loading } = useAuth();
@@ -18,20 +18,20 @@ export default function Notes() {
   const [showModal, setShowModal] = useState(false);
   const [editingNote, setEditingNote] = useState(null);
   const [loadingNotes, setLoadingNotes] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedNote, setSelectedNote] = useState(null);
   const refreshIntervalMs = 30000;
 
   const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    subject: '',
-    tags: '',
+    title: "",
+    content: "",
+    subject: "",
+    tags: "",
   });
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [isAuthenticated, loading, router]);
 
@@ -52,7 +52,9 @@ export default function Notes() {
         (note) =>
           note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          note.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+          note.tags?.some((tag) =>
+            tag.toLowerCase().includes(searchQuery.toLowerCase()),
+          ),
       );
       setFilteredNotes(filtered);
     } else {
@@ -63,11 +65,11 @@ export default function Notes() {
   const fetchNotes = async ({ silent = false } = {}) => {
     try {
       if (!silent) setLoadingNotes(true);
-      const response = await axios.get('/notes');
+      const response = await axios.get("/notes");
       setNotes(response.data);
       setFilteredNotes(response.data);
     } catch (error) {
-      if (!silent) toast.error('Failed to load notes');
+      if (!silent) toast.error("Failed to load notes");
       console.error(error);
     } finally {
       if (!silent) setLoadingNotes(false);
@@ -79,41 +81,44 @@ export default function Notes() {
     try {
       const noteData = {
         ...formData,
-        tags: formData.tags.split(',').map((t) => t.trim()).filter((t) => t),
+        tags: formData.tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter((t) => t),
       };
 
       if (editingNote) {
         await axios.put(`/notes/${editingNote._id}`, noteData);
-        toast.success('Note updated successfully');
+        toast.success("Note updated successfully");
       } else {
-        await axios.post('/notes', noteData);
-        toast.success('Note added successfully');
+        await axios.post("/notes", noteData);
+        toast.success("Note added successfully");
       }
       setShowModal(false);
       setEditingNote(null);
       setSelectedNote(null);
       setFormData({
-        title: '',
-        content: '',
-        subject: '',
-        tags: '',
+        title: "",
+        content: "",
+        subject: "",
+        tags: "",
       });
       fetchNotes();
     } catch (error) {
-      toast.error('Failed to save note');
+      toast.error("Failed to save note");
       console.error(error);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this note?')) return;
+    if (!confirm("Are you sure you want to delete this note?")) return;
     try {
       await axios.delete(`/notes/${id}`);
-      toast.success('Note deleted successfully');
+      toast.success("Note deleted successfully");
       if (selectedNote?._id === id) setSelectedNote(null);
       fetchNotes();
     } catch (error) {
-      toast.error('Failed to delete note');
+      toast.error("Failed to delete note");
       console.error(error);
     }
   };
@@ -123,8 +128,8 @@ export default function Notes() {
     setFormData({
       title: note.title,
       content: note.content,
-      subject: note.subject || '',
-      tags: note.tags ? note.tags.join(', ') : '',
+      subject: note.subject || "",
+      tags: note.tags ? note.tags.join(", ") : "",
     });
     setShowModal(true);
   };
@@ -142,7 +147,7 @@ export default function Notes() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
-      
+
       <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -162,10 +167,10 @@ export default function Notes() {
               onClick={() => {
                 setEditingNote(null);
                 setFormData({
-                  title: '',
-                  content: '',
-                  subject: '',
-                  tags: '',
+                  title: "",
+                  content: "",
+                  subject: "",
+                  tags: "",
                 });
                 setShowModal(true);
               }}
@@ -179,7 +184,10 @@ export default function Notes() {
           {/* Search */}
           <div className="mb-6">
             <div className="relative">
-              <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search
+                size={20}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              />
               <input
                 type="text"
                 value={searchQuery}
@@ -198,7 +206,9 @@ export default function Notes() {
                 <div className="glass-card rounded-2xl p-12 text-center">
                   <FileText size={48} className="mx-auto text-gray-400 mb-4" />
                   <p className="text-gray-600 dark:text-gray-400">
-                    {searchQuery ? 'No notes found' : 'No notes yet. Create your first note!'}
+                    {searchQuery
+                      ? "No notes found"
+                      : "No notes yet. Create your first note!"}
                   </p>
                 </div>
               ) : (
@@ -210,8 +220,8 @@ export default function Notes() {
                     onClick={() => setSelectedNote(note)}
                     className={`glass-card rounded-xl p-4 cursor-pointer transition-all hover:scale-[1.02] ${
                       selectedNote?._id === note._id
-                        ? 'ring-2 ring-blue-500'
-                        : ''
+                        ? "ring-2 ring-blue-500"
+                        : ""
                     }`}
                   >
                     <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
@@ -316,7 +326,7 @@ export default function Notes() {
               >
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {editingNote ? 'Edit Note' : 'Add Note'}
+                    {editingNote ? "Edit Note" : "Add Note"}
                   </h3>
                   <button
                     onClick={() => {
@@ -337,7 +347,9 @@ export default function Notes() {
                     <input
                       type="text"
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Note title"
                       required
@@ -351,7 +363,9 @@ export default function Notes() {
                     <input
                       type="text"
                       value={formData.subject}
-                      onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, subject: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="e.g., Mathematics"
                     />
@@ -363,7 +377,9 @@ export default function Notes() {
                     </label>
                     <textarea
                       value={formData.content}
-                      onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, content: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono"
                       placeholder="Write your note content here..."
                       rows={10}
@@ -378,7 +394,9 @@ export default function Notes() {
                     <input
                       type="text"
                       value={formData.tags}
-                      onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, tags: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="e.g., important, exam, chapter1"
                     />
@@ -388,7 +406,7 @@ export default function Notes() {
                     type="submit"
                     className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all font-semibold"
                   >
-                    {editingNote ? 'Update Note' : 'Add Note'}
+                    {editingNote ? "Update Note" : "Add Note"}
                   </button>
                 </form>
               </motion.div>

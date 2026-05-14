@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useRouter } from 'next/navigation';
-import Sidebar from '../../components/Sidebar';
-import axios from '../../lib/axios';
-import { motion } from 'framer-motion';
-import { Play, Pause, RotateCcw, Clock, TrendingUp } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
+import Sidebar from "../../components/Sidebar";
+import axios from "../../lib/axios";
+import { motion } from "framer-motion";
+import { Play, Pause, RotateCcw, Clock, TrendingUp } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Focus() {
   const { isAuthenticated, loading } = useAuth();
@@ -21,13 +21,13 @@ export default function Focus() {
   const [minutes, setMinutes] = useState(25);
   const [seconds, setSeconds] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [sessionType, setSessionType] = useState('pomodoro'); // pomodoro, shortBreak, longBreak
-  const [currentSubject, setCurrentSubject] = useState('');
+  const [sessionType, setSessionType] = useState("pomodoro"); // pomodoro, shortBreak, longBreak
+  const [currentSubject, setCurrentSubject] = useState("");
   const [interruptions, setInterruptions] = useState(0);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [isAuthenticated, loading, router]);
 
@@ -67,10 +67,10 @@ export default function Focus() {
   const fetchStats = async ({ silent = false } = {}) => {
     try {
       if (!silent) setLoadingStats(true);
-      const response = await axios.get('/focus/stats');
+      const response = await axios.get("/focus/stats");
       setStats(response.data);
     } catch (error) {
-      if (!silent) toast.error('Failed to load focus stats');
+      if (!silent) toast.error("Failed to load focus stats");
       console.error(error);
     } finally {
       if (!silent) setLoadingStats(false);
@@ -79,7 +79,7 @@ export default function Focus() {
 
   const fetchSessions = async () => {
     try {
-      const response = await axios.get('/focus');
+      const response = await axios.get("/focus");
       setSessions(response.data.slice(0, 10));
     } catch (error) {
       console.error(error);
@@ -88,28 +88,31 @@ export default function Focus() {
 
   const handleTimerComplete = async () => {
     setIsRunning(false);
-    
+
     // Save the completed session
     try {
-      const duration = sessionType === 'pomodoro' ? 25 : sessionType === 'shortBreak' ? 5 : 15;
-      await axios.post('/focus', {
+      const duration =
+        sessionType === "pomodoro" ? 25 : sessionType === "shortBreak" ? 5 : 15;
+      await axios.post("/focus", {
         duration,
-        subject: currentSubject || 'General',
-        type: 'pomodoro',
+        subject: currentSubject || "General",
+        type: "pomodoro",
         completed: true,
         interruptions,
       });
-      toast.success('Focus session completed!');
+      toast.success("Focus session completed!");
       fetchStats();
       fetchSessions();
     } catch (error) {
-      toast.error('Failed to save session');
+      toast.error("Failed to save session");
       console.error(error);
     }
 
     // Play notification sound
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      const utterance = new SpeechSynthesisUtterance('Focus session completed!');
+    if (typeof window !== "undefined" && window.speechSynthesis) {
+      const utterance = new SpeechSynthesisUtterance(
+        "Focus session completed!",
+      );
       window.speechSynthesis.speak(utterance);
     }
 
@@ -137,9 +140,9 @@ export default function Focus() {
   const handleSessionType = (type) => {
     setSessionType(type);
     setIsRunning(false);
-    if (type === 'pomodoro') {
+    if (type === "pomodoro") {
       setMinutes(25);
-    } else if (type === 'shortBreak') {
+    } else if (type === "shortBreak") {
       setMinutes(5);
     } else {
       setMinutes(15);
@@ -152,7 +155,7 @@ export default function Focus() {
   };
 
   const formatTime = (mins, secs) => {
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   if (loading || loadingStats) {
@@ -168,7 +171,7 @@ export default function Focus() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
-      
+
       <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -195,34 +198,34 @@ export default function Focus() {
                 <div className="text-8xl font-bold text-gray-900 dark:text-white mb-4 font-mono">
                   {formatTime(minutes, seconds)}
                 </div>
-                
+
                 <div className="flex justify-center gap-3 mb-6">
                   <button
-                    onClick={() => handleSessionType('pomodoro')}
+                    onClick={() => handleSessionType("pomodoro")}
                     className={`px-4 py-2 rounded-lg transition-all ${
-                      sessionType === 'pomodoro'
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      sessionType === "pomodoro"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                     }`}
                   >
                     Pomodoro (25m)
                   </button>
                   <button
-                    onClick={() => handleSessionType('shortBreak')}
+                    onClick={() => handleSessionType("shortBreak")}
                     className={`px-4 py-2 rounded-lg transition-all ${
-                      sessionType === 'shortBreak'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      sessionType === "shortBreak"
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                     }`}
                   >
                     Short Break (5m)
                   </button>
                   <button
-                    onClick={() => handleSessionType('longBreak')}
+                    onClick={() => handleSessionType("longBreak")}
                     className={`px-4 py-2 rounded-lg transition-all ${
-                      sessionType === 'longBreak'
-                        ? 'bg-purple-500 text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                      sessionType === "longBreak"
+                        ? "bg-purple-500 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                     }`}
                   >
                     Long Break (15m)
@@ -286,25 +289,33 @@ export default function Focus() {
                   </h3>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/50 dark:bg-white/5 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Hours</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Total Hours
+                      </p>
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
                         {stats.totalHours}
                       </p>
                     </div>
                     <div className="bg-white/50 dark:bg-white/5 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Today</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Today
+                      </p>
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
                         {stats.todayHours}h
                       </p>
                     </div>
                     <div className="bg-white/50 dark:bg-white/5 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">This Week</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        This Week
+                      </p>
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
                         {stats.weekHours}h
                       </p>
                     </div>
                     <div className="bg-white/50 dark:bg-white/5 rounded-lg p-4">
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Sessions</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        Sessions
+                      </p>
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">
                         {stats.completedSessions}
                       </p>

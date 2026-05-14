@@ -428,8 +428,7 @@ export default function Exams() {
                                       month: "long",
                                       day: "numeric",
                                     },
-                                  )}
-                                  {" "}
+                                  )}{" "}
                                   {new Date(exam.date).toLocaleTimeString(
                                     "en-US",
                                     {

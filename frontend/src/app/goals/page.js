@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useRouter } from 'next/navigation';
-import Sidebar from '../../components/Sidebar';
-import axios from '../../lib/axios';
-import { motion } from 'framer-motion';
-import { Plus, Edit2, Trash2, Target, TrendingUp } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
+import Sidebar from "../../components/Sidebar";
+import axios from "../../lib/axios";
+import { motion } from "framer-motion";
+import { Plus, Edit2, Trash2, Target, TrendingUp } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Goals() {
   const { isAuthenticated, loading } = useAuth();
@@ -19,17 +19,17 @@ export default function Goals() {
   const refreshIntervalMs = 30000;
 
   const [formData, setFormData] = useState({
-    type: 'custom',
-    title: '',
+    type: "custom",
+    title: "",
     target: 100,
     current: 0,
-    unit: '',
-    deadline: '',
+    unit: "",
+    deadline: "",
   });
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [isAuthenticated, loading, router]);
 
@@ -47,10 +47,10 @@ export default function Goals() {
   const fetchGoals = async ({ silent = false } = {}) => {
     try {
       if (!silent) setLoadingGoals(true);
-      const response = await axios.get('/goals');
+      const response = await axios.get("/goals");
       setGoals(response.data);
     } catch (error) {
-      if (!silent) toast.error('Failed to load goals');
+      if (!silent) toast.error("Failed to load goals");
       console.error(error);
     } finally {
       if (!silent) setLoadingGoals(false);
@@ -62,36 +62,36 @@ export default function Goals() {
     try {
       if (editingGoal) {
         await axios.put(`/goals/${editingGoal._id}`, formData);
-        toast.success('Goal updated successfully');
+        toast.success("Goal updated successfully");
       } else {
-        await axios.post('/goals', formData);
-        toast.success('Goal added successfully');
+        await axios.post("/goals", formData);
+        toast.success("Goal added successfully");
       }
       setShowModal(false);
       setEditingGoal(null);
       setFormData({
-        type: 'custom',
-        title: '',
+        type: "custom",
+        title: "",
         target: 100,
         current: 0,
-        unit: '',
-        deadline: '',
+        unit: "",
+        deadline: "",
       });
       fetchGoals();
     } catch (error) {
-      toast.error('Failed to save goal');
+      toast.error("Failed to save goal");
       console.error(error);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this goal?')) return;
+    if (!confirm("Are you sure you want to delete this goal?")) return;
     try {
       await axios.delete(`/goals/${id}`);
-      toast.success('Goal deleted successfully');
+      toast.success("Goal deleted successfully");
       fetchGoals();
     } catch (error) {
-      toast.error('Failed to delete goal');
+      toast.error("Failed to delete goal");
       console.error(error);
     }
   };
@@ -104,7 +104,7 @@ export default function Goals() {
       target: goal.target,
       current: goal.current,
       unit: goal.unit,
-      deadline: goal.deadline ? goal.deadline.split('T')[0] : '',
+      deadline: goal.deadline ? goal.deadline.split("T")[0] : "",
     });
     setShowModal(true);
   };
@@ -112,19 +112,19 @@ export default function Goals() {
   const handleProgressUpdate = async (goal, newCurrent) => {
     try {
       await axios.put(`/goals/${goal._id}`, { current: newCurrent });
-      toast.success('Progress updated');
+      toast.success("Progress updated");
       fetchGoals();
     } catch (error) {
-      toast.error('Failed to update progress');
+      toast.error("Failed to update progress");
       console.error(error);
     }
   };
 
   const getProgressColor = (progress) => {
-    if (progress >= 100) return 'from-green-500 to-green-600';
-    if (progress >= 75) return 'from-blue-500 to-blue-600';
-    if (progress >= 50) return 'from-yellow-500 to-yellow-600';
-    return 'from-orange-500 to-orange-600';
+    if (progress >= 100) return "from-green-500 to-green-600";
+    if (progress >= 75) return "from-blue-500 to-blue-600";
+    if (progress >= 50) return "from-yellow-500 to-yellow-600";
+    return "from-orange-500 to-orange-600";
   };
 
   const getTypeIcon = (type) => {
@@ -144,7 +144,7 @@ export default function Goals() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
-      
+
       <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -164,12 +164,12 @@ export default function Goals() {
               onClick={() => {
                 setEditingGoal(null);
                 setFormData({
-                  type: 'custom',
-                  title: '',
+                  type: "custom",
+                  title: "",
                   target: 100,
                   current: 0,
-                  unit: '',
-                  deadline: '',
+                  unit: "",
+                  deadline: "",
                 });
                 setShowModal(true);
               }}
@@ -196,7 +196,9 @@ export default function Goals() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={`glass-card rounded-2xl p-6 ${
-                    goal.status === 'completed' ? 'border-2 border-green-500' : ''
+                    goal.status === "completed"
+                      ? "border-2 border-green-500"
+                      : ""
                   }`}
                 >
                   <div className="flex justify-between items-start mb-4">
@@ -254,13 +256,17 @@ export default function Goals() {
                   {/* Current / Target */}
                   <div className="flex justify-between items-center mb-4">
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Current</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Current
+                      </p>
                       <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {goal.current} {goal.unit}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Target</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Target
+                      </p>
                       <p className="text-lg font-semibold text-gray-900 dark:text-white">
                         {goal.target} {goal.unit}
                       </p>
@@ -270,13 +276,20 @@ export default function Goals() {
                   {/* Quick Update */}
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleProgressUpdate(goal, goal.current + 1)}
+                      onClick={() =>
+                        handleProgressUpdate(goal, goal.current + 1)
+                      }
                       className="flex-1 py-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400 transition-all text-sm font-medium"
                     >
                       +1
                     </button>
                     <button
-                      onClick={() => handleProgressUpdate(goal, Math.max(0, goal.current - 1))}
+                      onClick={() =>
+                        handleProgressUpdate(
+                          goal,
+                          Math.max(0, goal.current - 1),
+                        )
+                      }
                       className="flex-1 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 transition-all text-sm font-medium"
                     >
                       -1
@@ -289,7 +302,7 @@ export default function Goals() {
                     </p>
                   )}
 
-                  {goal.status === 'completed' && (
+                  {goal.status === "completed" && (
                     <div className="mt-3 p-2 bg-green-100 text-green-600 rounded-lg text-center text-sm font-medium dark:bg-green-900/30 dark:text-green-400">
                       🎉 Goal Completed!
                     </div>
@@ -309,7 +322,7 @@ export default function Goals() {
               >
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    {editingGoal ? 'Edit Goal' : 'Add Goal'}
+                    {editingGoal ? "Edit Goal" : "Add Goal"}
                   </h3>
                   <button
                     onClick={() => {
@@ -329,14 +342,18 @@ export default function Goals() {
                     </label>
                     <select
                       value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, type: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="custom">Custom</option>
                       <option value="cgpa">CGPA</option>
                       <option value="daily_study">Daily Study Hours</option>
                       <option value="attendance">Attendance Target</option>
-                      <option value="weekly_productivity">Weekly Productivity</option>
+                      <option value="weekly_productivity">
+                        Weekly Productivity
+                      </option>
                     </select>
                   </div>
 
@@ -347,7 +364,9 @@ export default function Goals() {
                     <input
                       type="text"
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="e.g., Achieve 3.5 CGPA"
                       required
@@ -362,7 +381,12 @@ export default function Goals() {
                       <input
                         type="number"
                         value={formData.target}
-                        onChange={(e) => setFormData({ ...formData, target: parseFloat(e.target.value) })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            target: parseFloat(e.target.value),
+                          })
+                        }
                         className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
@@ -374,7 +398,12 @@ export default function Goals() {
                       <input
                         type="number"
                         value={formData.current}
-                        onChange={(e) => setFormData({ ...formData, current: parseFloat(e.target.value) })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            current: parseFloat(e.target.value),
+                          })
+                        }
                         className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                         required
                       />
@@ -388,7 +417,9 @@ export default function Goals() {
                     <input
                       type="text"
                       value={formData.unit}
-                      onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, unit: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="e.g., hours, %, points"
                     />
@@ -401,7 +432,9 @@ export default function Goals() {
                     <input
                       type="date"
                       value={formData.deadline}
-                      onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, deadline: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -410,7 +443,7 @@ export default function Goals() {
                     type="submit"
                     className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all font-semibold"
                   >
-                    {editingGoal ? 'Update Goal' : 'Add Goal'}
+                    {editingGoal ? "Update Goal" : "Add Goal"}
                   </button>
                 </form>
               </motion.div>

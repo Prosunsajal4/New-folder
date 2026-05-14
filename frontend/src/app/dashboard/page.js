@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useRouter } from 'next/navigation';
-import Sidebar from '../../components/Sidebar';
-import StatCard from '../../components/StatCard';
-import FocusChart from '../../components/FocusChart';
-import axios from '../../lib/axios';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
+import Sidebar from "../../components/Sidebar";
+import StatCard from "../../components/StatCard";
+import FocusChart from "../../components/FocusChart";
+import axios from "../../lib/axios";
+import { motion } from "framer-motion";
 import {
   Users,
   TrendingUp,
@@ -17,8 +17,8 @@ import {
   Target,
   AlertCircle,
   CheckCircle,
-} from 'lucide-react';
-import toast from 'react-hot-toast';
+} from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Dashboard() {
   const { isAuthenticated, loading } = useAuth();
@@ -31,7 +31,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [isAuthenticated, loading, router]);
 
@@ -49,18 +49,18 @@ export default function Dashboard() {
   const fetchDashboardData = async ({ silent = false } = {}) => {
     try {
       if (!silent) setLoadingStats(true);
-      
+
       const [statsRes, chartRes, deadlinesRes] = await Promise.all([
-        axios.get('/dashboard/stats'),
-        axios.get('/dashboard/focus-chart-data'),
-        axios.get('/dashboard/upcoming-deadlines'),
+        axios.get("/dashboard/stats"),
+        axios.get("/dashboard/focus-chart-data"),
+        axios.get("/dashboard/upcoming-deadlines"),
       ]);
 
       setStats(statsRes.data);
       setChartData(chartRes.data);
       setDeadlines(deadlinesRes.data);
     } catch (error) {
-      if (!silent) toast.error('Failed to load dashboard data');
+      if (!silent) toast.error("Failed to load dashboard data");
       console.error(error);
     } finally {
       if (!silent) setLoadingStats(false);
@@ -80,7 +80,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
-      
+
       <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -180,11 +180,11 @@ export default function Dashboard() {
                     </div>
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        assignment.priority === 'high'
-                          ? 'bg-red-100 text-red-600'
-                          : assignment.priority === 'medium'
-                          ? 'bg-yellow-100 text-yellow-600'
-                          : 'bg-green-100 text-green-600'
+                        assignment.priority === "high"
+                          ? "bg-red-100 text-red-600"
+                          : assignment.priority === "medium"
+                            ? "bg-yellow-100 text-yellow-600"
+                            : "bg-green-100 text-green-600"
                       }`}
                     >
                       {assignment.priority}
@@ -210,11 +210,12 @@ export default function Dashboard() {
                     </span>
                   </div>
                 ))}
-                {(!deadlines?.assignments?.length && !deadlines?.exams?.length) && (
-                  <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-                    No upcoming deadlines
-                  </p>
-                )}
+                {!deadlines?.assignments?.length &&
+                  !deadlines?.exams?.length && (
+                    <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+                      No upcoming deadlines
+                    </p>
+                  )}
               </div>
             </motion.div>
           </div>
@@ -233,7 +234,9 @@ export default function Dashboard() {
                 {stats.goalsProgress.map((goal, index) => (
                   <div key={index}>
                     <div className="flex justify-between mb-2">
-                      <span className="text-gray-700 dark:text-gray-300">{goal.title}</span>
+                      <span className="text-gray-700 dark:text-gray-300">
+                        {goal.title}
+                      </span>
                       <span className="text-gray-600 dark:text-gray-400">
                         {goal.current.toFixed(1)} / {goal.target} {goal.unit}
                       </span>
@@ -260,17 +263,25 @@ export default function Dashboard() {
               className="mt-6 glass-card rounded-2xl p-6 border-l-4 border-red-500"
             >
               <div className="flex items-start gap-3">
-                <AlertCircle size={24} className="text-red-500 flex-shrink-0 mt-1" />
+                <AlertCircle
+                  size={24}
+                  className="text-red-500 flex-shrink-0 mt-1"
+                />
                 <div>
                   <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
                     Attention Required
                   </h4>
                   <ul className="space-y-1 text-gray-600 dark:text-gray-400">
                     {stats.overdueAssignments > 0 && (
-                      <li>• You have {stats.overdueAssignments} overdue assignments</li>
+                      <li>
+                        • You have {stats.overdueAssignments} overdue
+                        assignments
+                      </li>
                     )}
                     {stats.overallAttendance < 75 && (
-                      <li>• Your attendance is below 75%. Attend more classes!</li>
+                      <li>
+                        • Your attendance is below 75%. Attend more classes!
+                      </li>
                     )}
                   </ul>
                 </div>

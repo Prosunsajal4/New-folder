@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useRouter } from 'next/navigation';
-import Sidebar from '../../components/Sidebar';
-import axios from '../../lib/axios';
-import { motion } from 'framer-motion';
-import { Calendar, Clock, BookOpen, TrendingUp, Sparkles } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
+import Sidebar from "../../components/Sidebar";
+import axios from "../../lib/axios";
+import { motion } from "framer-motion";
+import { Calendar, Clock, BookOpen, TrendingUp, Sparkles } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function StudyPlanner() {
   const { isAuthenticated, loading } = useAuth();
@@ -16,35 +16,44 @@ export default function StudyPlanner() {
   const [loadingPlan, setLoadingPlan] = useState(false);
 
   const [formData, setFormData] = useState({
-    subjects: '',
-    examDates: '',
-    weakSubjects: '',
+    subjects: "",
+    examDates: "",
+    weakSubjects: "",
     dailyFreeTime: 4,
   });
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [isAuthenticated, loading, router]);
 
   const handleGeneratePlan = async (e) => {
     e.preventDefault();
     setLoadingPlan(true);
-    
+
     try {
       const planData = {
-        subjects: formData.subjects.split(',').map(s => s.trim()).filter(s => s),
-        examDates: formData.examDates.split(',').map(d => d.trim()).filter(d => d),
-        weakSubjects: formData.weakSubjects.split(',').map(s => s.trim()).filter(s => s),
+        subjects: formData.subjects
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s),
+        examDates: formData.examDates
+          .split(",")
+          .map((d) => d.trim())
+          .filter((d) => d),
+        weakSubjects: formData.weakSubjects
+          .split(",")
+          .map((s) => s.trim())
+          .filter((s) => s),
         dailyFreeTime: formData.dailyFreeTime,
       };
 
-      const response = await axios.post('/ai/study-planner', planData);
+      const response = await axios.post("/ai/study-planner", planData);
       setPlan(response.data);
-      toast.success('Study plan generated successfully!');
+      toast.success("Study plan generated successfully!");
     } catch (error) {
-      toast.error('Failed to generate study plan');
+      toast.error("Failed to generate study plan");
       console.error(error);
     } finally {
       setLoadingPlan(false);
@@ -64,7 +73,7 @@ export default function StudyPlanner() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
-      
+
       <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -102,7 +111,9 @@ export default function StudyPlanner() {
                   <input
                     type="text"
                     value={formData.subjects}
-                    onChange={(e) => setFormData({ ...formData, subjects: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, subjects: e.target.value })
+                    }
                     className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., Mathematics, Physics, Chemistry"
                     required
@@ -116,7 +127,9 @@ export default function StudyPlanner() {
                   <input
                     type="text"
                     value={formData.examDates}
-                    onChange={(e) => setFormData({ ...formData, examDates: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, examDates: e.target.value })
+                    }
                     className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., Mathematics:2024-06-15, Physics:2024-06-20"
                   />
@@ -129,7 +142,9 @@ export default function StudyPlanner() {
                   <input
                     type="text"
                     value={formData.weakSubjects}
-                    onChange={(e) => setFormData({ ...formData, weakSubjects: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, weakSubjects: e.target.value })
+                    }
                     className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="e.g., Mathematics, Chemistry"
                   />
@@ -142,7 +157,12 @@ export default function StudyPlanner() {
                   <input
                     type="number"
                     value={formData.dailyFreeTime}
-                    onChange={(e) => setFormData({ ...formData, dailyFreeTime: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        dailyFreeTime: parseInt(e.target.value),
+                      })
+                    }
                     className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     min="1"
                     max="16"
@@ -182,7 +202,7 @@ export default function StudyPlanner() {
                     <TrendingUp size={24} className="text-green-500" />
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                       Your Study Plan
-                </h2>
+                    </h2>
                   </div>
 
                   {/* Daily Schedule */}
@@ -199,9 +219,9 @@ export default function StudyPlanner() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: index * 0.1 }}
                           className={`p-3 rounded-lg ${
-                            item.priority === 'high'
-                              ? 'bg-red-100 dark:bg-red-900/20 border-l-4 border-red-500'
-                              : 'bg-blue-100 dark:bg-blue-900/20 border-l-4 border-blue-500'
+                            item.priority === "high"
+                              ? "bg-red-100 dark:bg-red-900/20 border-l-4 border-red-500"
+                              : "bg-blue-100 dark:bg-blue-900/20 border-l-4 border-blue-500"
                           }`}
                         >
                           <div className="flex justify-between items-center">
@@ -212,7 +232,7 @@ export default function StudyPlanner() {
                               {item.duration}h
                             </span>
                           </div>
-                          {item.priority === 'high' && (
+                          {item.priority === "high" && (
                             <span className="text-xs text-red-600 dark:text-red-400 mt-1">
                               ⚠️ Priority subject - Focus more here!
                             </span>

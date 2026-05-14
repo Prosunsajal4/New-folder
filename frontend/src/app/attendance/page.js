@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useRouter } from 'next/navigation';
-import Sidebar from '../../components/Sidebar';
-import axios from '../../lib/axios';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useRouter } from "next/navigation";
+import Sidebar from "../../components/Sidebar";
+import axios from "../../lib/axios";
+import { motion } from "framer-motion";
 import {
   Plus,
   Edit2,
@@ -15,8 +15,8 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle,
-} from 'lucide-react';
-import toast from 'react-hot-toast';
+} from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Attendance() {
   const { isAuthenticated, loading } = useAuth();
@@ -31,14 +31,14 @@ export default function Attendance() {
   const refreshIntervalMs = 30000;
 
   const [newCourse, setNewCourse] = useState({
-    name: '',
+    name: "",
     sectionA: { totalClasses: 30, attended: [] },
     sectionB: { totalClasses: 30, attended: [] },
   });
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [isAuthenticated, loading, router]);
 
@@ -56,7 +56,7 @@ export default function Attendance() {
   const fetchCourses = async ({ silent = false } = {}) => {
     try {
       if (!silent) setLoadingCourses(true);
-      const response = await axios.get('/courses');
+      const response = await axios.get("/courses");
       setCourses(response.data);
       if (response.data.length > 0) {
         const current = selectedCourse
@@ -67,7 +67,7 @@ export default function Attendance() {
         setSelectedCourse(null);
       }
     } catch (error) {
-      if (!silent) toast.error('Failed to load courses');
+      if (!silent) toast.error("Failed to load courses");
       console.error(error);
     } finally {
       if (!silent) setLoadingCourses(false);
@@ -77,29 +77,29 @@ export default function Attendance() {
   const handleAddCourse = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/courses', newCourse);
-      toast.success('Course added successfully');
+      await axios.post("/courses", newCourse);
+      toast.success("Course added successfully");
       setShowAddModal(false);
       setNewCourse({
-        name: '',
+        name: "",
         sectionA: { totalClasses: 30, attended: [] },
         sectionB: { totalClasses: 30, attended: [] },
       });
       fetchCourses();
     } catch (error) {
-      toast.error('Failed to add course');
+      toast.error("Failed to add course");
       console.error(error);
     }
   };
 
   const handleDeleteCourse = async (courseId) => {
-    if (!confirm('Are you sure you want to delete this course?')) return;
+    if (!confirm("Are you sure you want to delete this course?")) return;
     try {
       await axios.delete(`/courses/${courseId}`);
-      toast.success('Course deleted successfully');
+      toast.success("Course deleted successfully");
       fetchCourses();
     } catch (error) {
-      toast.error('Failed to delete course');
+      toast.error("Failed to delete course");
       console.error(error);
     }
   };
@@ -121,11 +121,13 @@ export default function Attendance() {
     try {
       await axios.put(`/courses/${selectedCourse._id}`, updatedCourse);
       setSelectedCourse(updatedCourse);
-      setCourses(courses.map(c => c._id === selectedCourse._id ? updatedCourse : c));
-      toast.success('Attendance updated');
+      setCourses(
+        courses.map((c) => (c._id === selectedCourse._id ? updatedCourse : c)),
+      );
+      toast.success("Attendance updated");
       fetchCourses({ silent: true });
     } catch (error) {
-      toast.error('Failed to update attendance');
+      toast.error("Failed to update attendance");
       console.error(error);
     } finally {
       setSaving(false);
@@ -134,11 +136,13 @@ export default function Attendance() {
 
   const handleGetPredictions = async () => {
     try {
-      const response = await axios.post('/ai/attendance-prediction', { courses });
+      const response = await axios.post("/ai/attendance-prediction", {
+        courses,
+      });
       setPredictions(response.data.predictions);
       setShowPredictions(true);
     } catch (error) {
-      toast.error('Failed to get predictions');
+      toast.error("Failed to get predictions");
       console.error(error);
     }
   };
@@ -147,22 +151,24 @@ export default function Attendance() {
     const attended = selectedCourse[section].attended;
     return (
       <div className="grid grid-cols-6 sm:grid-cols-10 gap-2">
-        {Array.from({ length: totalClasses }, (_, i) => i + 1).map((classNum) => (
-          <motion.button
-            key={classNum}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => toggleAttendance(section, classNum)}
-            disabled={saving}
-            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-xs font-medium transition-all ${
-              attended.includes(classNum)
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
-          >
-            {classNum}
-          </motion.button>
-        ))}
+        {Array.from({ length: totalClasses }, (_, i) => i + 1).map(
+          (classNum) => (
+            <motion.button
+              key={classNum}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => toggleAttendance(section, classNum)}
+              disabled={saving}
+              className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-xs font-medium transition-all ${
+                attended.includes(classNum)
+                  ? "bg-green-500 text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+              }`}
+            >
+              {classNum}
+            </motion.button>
+          ),
+        )}
       </div>
     );
   };
@@ -182,7 +188,7 @@ export default function Attendance() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
-      
+
       <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -225,8 +231,8 @@ export default function Attendance() {
                   onClick={() => setSelectedCourse(course)}
                   className={`px-4 py-2 rounded-lg transition-all ${
                     selectedCourse?._id === course._id
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      ? "bg-blue-500 text-white"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }`}
                 >
                   {course.name}
@@ -263,26 +269,38 @@ export default function Attendance() {
                   <div
                     key={pred.courseId}
                     className={`p-4 rounded-lg ${
-                      pred.riskLevel === 'critical'
-                        ? 'bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700'
-                        : pred.riskLevel === 'high'
-                        ? 'bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700'
-                        : pred.riskLevel === 'medium'
-                        ? 'bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700'
-                        : 'bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700'
+                      pred.riskLevel === "critical"
+                        ? "bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-700"
+                        : pred.riskLevel === "high"
+                          ? "bg-orange-100 dark:bg-orange-900/20 border border-orange-300 dark:border-orange-700"
+                          : pred.riskLevel === "medium"
+                            ? "bg-yellow-100 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700"
+                            : "bg-green-100 dark:bg-green-900/20 border border-green-300 dark:border-green-700"
                     }`}
                   >
                     <div className="flex items-start gap-3">
-                      {pred.riskLevel === 'critical' || pred.riskLevel === 'high' ? (
-                        <AlertTriangle size={20} className="text-red-600 flex-shrink-0 mt-1" />
+                      {pred.riskLevel === "critical" ||
+                      pred.riskLevel === "high" ? (
+                        <AlertTriangle
+                          size={20}
+                          className="text-red-600 flex-shrink-0 mt-1"
+                        />
                       ) : (
-                        <CheckCircle size={20} className="text-green-600 flex-shrink-0 mt-1" />
+                        <CheckCircle
+                          size={20}
+                          className="text-green-600 flex-shrink-0 mt-1"
+                        />
                       )}
                       <div>
-                        <p className="font-semibold text-gray-900 dark:text-white">{pred.courseName}</p>
-                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">{pred.suggestion}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white">
+                          {pred.courseName}
+                        </p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                          {pred.suggestion}
+                        </p>
                         <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                          Current: {pred.currentAttendance}% | Safe absences: {pred.safeAbsences}
+                          Current: {pred.currentAttendance}% | Safe absences:{" "}
+                          {pred.safeAbsences}
                         </p>
                       </div>
                     </div>
@@ -302,25 +320,33 @@ export default function Attendance() {
               {/* Stats Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="glass-card rounded-xl p-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Attendance</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    Total Attendance
+                  </p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {stats.total?.percentage || 0}%
                   </p>
                 </div>
                 <div className="glass-card rounded-xl p-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Marks</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    Total Marks
+                  </p>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
                     {stats.total?.marks || 0}/10
                   </p>
                 </div>
                 <div className="glass-card rounded-xl p-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Attended</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    Attended
+                  </p>
                   <p className="text-2xl font-bold text-green-600">
                     {stats.total?.attended || 0}
                   </p>
                 </div>
                 <div className="glass-card rounded-xl p-4">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Safe Absences</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                    Safe Absences
+                  </p>
                   <p className="text-2xl font-bold text-blue-600">
                     {stats.total?.safeAbsences || 0}
                   </p>
@@ -330,33 +356,45 @@ export default function Attendance() {
               {/* Section A */}
               <div className="glass-card rounded-2xl p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Section A</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Section A
+                  </h3>
                   <div className="flex gap-4 text-sm">
                     <span className="text-gray-600 dark:text-gray-400">
-                      {stats.sectionA?.attended || 0}/{selectedCourse.sectionA.totalClasses} attended
+                      {stats.sectionA?.attended || 0}/
+                      {selectedCourse.sectionA.totalClasses} attended
                     </span>
                     <span className="font-semibold text-gray-900 dark:text-white">
                       {stats.sectionA?.percentage || 0}%
                     </span>
                   </div>
                 </div>
-                {renderAttendanceGrid('sectionA', selectedCourse.sectionA.totalClasses)}
+                {renderAttendanceGrid(
+                  "sectionA",
+                  selectedCourse.sectionA.totalClasses,
+                )}
               </div>
 
               {/* Section B */}
               <div className="glass-card rounded-2xl p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Section B</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    Section B
+                  </h3>
                   <div className="flex gap-4 text-sm">
                     <span className="text-gray-600 dark:text-gray-400">
-                      {stats.sectionB?.attended || 0}/{selectedCourse.sectionB.totalClasses} attended
+                      {stats.sectionB?.attended || 0}/
+                      {selectedCourse.sectionB.totalClasses} attended
                     </span>
                     <span className="font-semibold text-gray-900 dark:text-white">
                       {stats.sectionB?.percentage || 0}%
                     </span>
                   </div>
                 </div>
-                {renderAttendanceGrid('sectionB', selectedCourse.sectionB.totalClasses)}
+                {renderAttendanceGrid(
+                  "sectionB",
+                  selectedCourse.sectionB.totalClasses,
+                )}
               </div>
 
               {/* Delete Course Button */}
@@ -398,7 +436,9 @@ export default function Attendance() {
                     <input
                       type="text"
                       value={newCourse.name}
-                      onChange={(e) => setNewCourse({ ...newCourse, name: e.target.value })}
+                      onChange={(e) =>
+                        setNewCourse({ ...newCourse, name: e.target.value })
+                      }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="e.g., Digital Signal Processing"
                       required
@@ -415,7 +455,10 @@ export default function Attendance() {
                       onChange={(e) =>
                         setNewCourse({
                           ...newCourse,
-                          sectionA: { ...newCourse.sectionA, totalClasses: parseInt(e.target.value) },
+                          sectionA: {
+                            ...newCourse.sectionA,
+                            totalClasses: parseInt(e.target.value),
+                          },
                         })
                       }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -434,7 +477,10 @@ export default function Attendance() {
                       onChange={(e) =>
                         setNewCourse({
                           ...newCourse,
-                          sectionB: { ...newCourse.sectionB, totalClasses: parseInt(e.target.value) },
+                          sectionB: {
+                            ...newCourse.sectionB,
+                            totalClasses: parseInt(e.target.value),
+                          },
                         })
                       }
                       className="w-full px-4 py-2 rounded-lg bg-white/50 dark:bg-white/10 border border-white/20 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
