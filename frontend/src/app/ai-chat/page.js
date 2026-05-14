@@ -40,6 +40,13 @@ export default function AIChat() {
     e.preventDefault();
     if (!inputMessage.trim()) return;
 
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    if (!token) {
+      toast.error("Please log in to use AI chat.");
+      router.push("/login");
+      return;
+    }
+
     const userMessage = inputMessage.trim();
     setInputMessage("");
 
@@ -58,13 +65,15 @@ export default function AIChat() {
       ]);
     } catch (error) {
       console.error("AI Chat Error:", error);
-      toast.error("AI service temporarily unavailable. Please try again.");
+      const errorMsg = error.response?.data?.message || error.message || "Unknown error";
+      console.error("Full error details:", { status: error.response?.status, data: error.response?.data, message: error.message });
+      toast.error("AI service error: " + errorMsg);
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
           content:
-            "Sorry, I'm having trouble connecting right now. Please check your internet connection and try again in a moment.",
+            "Sorry, I'm having trouble connecting right now. Error: " + errorMsg + ". Please try again.",
         },
       ]);
     } finally {
