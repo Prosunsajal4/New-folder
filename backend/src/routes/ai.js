@@ -105,7 +105,8 @@ router.post("/chat", protect, async (req, res) => {
     // Use Gemini or OpenAI based on what's available
     if (serviceType === "gemini") {
       console.log("Using Gemini AI service");
-      const model = aiService.getGenerativeModel({ model: "gemini-1.5-flash" });
+      // Use gemini-pro which is widely available and stable
+      const model = aiService.getGenerativeModel({ model: "gemini-pro" });
 
       const trimmedMessages = Array.isArray(messages)
         ? messages
