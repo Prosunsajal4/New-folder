@@ -13,33 +13,55 @@ const openai = process.env.OPENAI_API_KEY ? new OpenAI({
 // @access  Private
 router.post('/chat', protect, async (req, res) => {
   try {
-    const { message, context } = req.body;
+    const { message, context, messages } = req.body;
 
     if (!openai) {
-      // Return mock response if no API key
-      const mockResponses = [
-        "I'd be happy to help with your studies! Based on your question, I recommend breaking down the topic into smaller parts and practicing regularly.",
-        "Great question! For effective studying, try the Pomodoro technique - 25 minutes of focused study followed by a 5-minute break.",
-        "To improve your attendance, aim to attend at least 80% of your classes. You can safely miss a few classes if you maintain this ratio.",
-        "For better productivity, set specific daily goals and track your progress. Consistency is key!",
-      ];
-      const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
-      return res.json({ response: randomResponse });
+      const text = String(message || '').toLowerCase();
+      if (text.includes('routine')) {
+        return res.json({
+          response: "Here is a simple daily routine: 1) Morning: review notes 30–45m. 2) Midday: 2 focused study blocks (25–40m each). 3) Evening: practice problems 45–60m. 4) Night: quick recap + plan tomorrow. Want it customized by subjects and free time?",
+        });
+      }
+      if (text.includes('attendance')) {
+        return res.json({
+          response: "I can calculate attendance and safe absences. Share: total classes, attended classes, and required percentage (e.g., 75% or 80%).",
+        });
+      }
+      if (text.includes('explain')) {
+        return res.json({
+          response: "I can explain step-by-step. Tell me the exact topic and your current level (beginner/intermediate/advanced).",
+        });
+      }
+      return res.json({
+        response: "I can help with study plans, explanations, summaries, and productivity tips. Tell me your subject, deadline, and how much time you have each day.",
+      });
     }
 
+    const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
+    const trimmedMessages = Array.isArray(messages)
+      ? messages
+          .filter((m) => m && (m.role === 'user' || m.role === 'assistant') && m.content)
+          .slice(-10)
+      : [];
+    const conversation = trimmedMessages.length > 0
+      ? trimmedMessages
+      : [{ role: 'user', content: message }];
+
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model,
       messages: [
         {
           role: 'system',
-          content: 'You are a helpful AI assistant for students. Help them with study planning, attendance calculations, and productivity tips.',
+          content:
+            'You are StudentOS AI Assistant. Provide clear, accurate, and practical help for students. Ask clarifying questions when needed. Use concise steps, examples, and avoid fluff. If asked for calculations, request the required numbers. If a request is ambiguous, ask one short follow-up question.',
         },
-        {
-          role: 'user',
-          content: message,
-        },
+        ...(context
+          ? [{ role: 'system', content: `Context: ${String(context)}` }]
+          : []),
+        ...conversation,
       ],
-      max_tokens: 500,
+      max_tokens: 700,
+      temperature: 0.4,
     });
 
     res.json({ response: completion.choices[0].message.content });
@@ -105,6 +127,24 @@ router.post('/study-planner', protect, async (req, res) => {
   try {
     const { subjects, examDates, weakSubjects, dailyFreeTime } = req.body;
 
+    if (!Array.isArray(subjects) || subjects.length === 0) {
+      return res.status(400).json({ message: 'Please provide at least one subject.' });
+    }
+
+    const parsedExamDates = Array.isArray(examDates)
+      ? examDates
+          .map((entry) => {
+            if (typeof entry === 'string') {
+              const parts = entry.split(':');
+              if (parts.length >= 2) {
+                return { subject: parts[0].trim(), date: parts.slice(1).join(':').trim() };
+              }
+            }
+            return entry && entry.subject && entry.date ? entry : null;
+          })
+          .filter(Boolean)
+      : [];
+
     // Simple study planner logic
     const plan = {
       dailySchedule: [],
@@ -131,8 +171,8 @@ router.post('/study-planner', protect, async (req, res) => {
       );
     }
 
-    if (examDates && examDates.length > 0) {
-      const upcomingExams = examDates
+    if (parsedExamDates.length > 0) {
+      const upcomingExams = parsedExamDates
         .filter(e => new Date(e.date) > new Date())
         .sort((a, b) => new Date(a.date) - new Date(b.date))
         .slice(0, 3);

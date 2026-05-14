@@ -62,10 +62,10 @@ export default function StudyPlanner() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
       
-      <main className="lg:ml-64 p-6 lg:p-8">
+      <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

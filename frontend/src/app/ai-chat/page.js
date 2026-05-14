@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../components/Sidebar";
@@ -20,7 +20,7 @@ export default function AIChat() {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [sendingMessage, setSendingMessage] = useState(false);
-  const messagesEndRef = useState(null);
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -43,11 +43,15 @@ export default function AIChat() {
     const userMessage = inputMessage.trim();
     setInputMessage("");
 
-    setMessages([...messages, { role: "user", content: userMessage }]);
+    const nextMessages = [...messages, { role: "user", content: userMessage }];
+    setMessages(nextMessages);
     setSendingMessage(true);
 
     try {
-      const response = await axios.post("/ai/chat", { message: userMessage });
+      const response = await axios.post("/ai/chat", {
+        message: userMessage,
+        messages: nextMessages.slice(-10),
+      });
       setMessages((prev) => [
         ...prev,
         { role: "assistant", content: response.data.response },
@@ -86,10 +90,10 @@ export default function AIChat() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
 
-      <main className="lg:ml-64 p-6 lg:p-8 h-screen flex flex-col">
+      <main className="flex-1 p-6 lg:p-8 flex flex-col">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

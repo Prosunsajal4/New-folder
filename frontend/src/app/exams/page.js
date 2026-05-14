@@ -96,11 +96,13 @@ export default function Exams() {
   const [showModal, setShowModal] = useState(false);
   const [editingExam, setEditingExam] = useState(null);
   const [loadingExams, setLoadingExams] = useState(true);
+  const refreshIntervalMs = 30000;
 
   const [formData, setFormData] = useState({
     title: "",
     subject: "",
     date: "",
+    time: "",
     topics: "",
     readinessCheckboxes: {
       questionsCollected: false,
@@ -119,29 +121,46 @@ export default function Exams() {
   }, [isAuthenticated, loading, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchExams();
-    }
+    if (!isAuthenticated) return;
+
+    fetchExams();
+    const intervalId = setInterval(() => {
+      fetchExams({ silent: true });
+    }, refreshIntervalMs);
+
+    return () => clearInterval(intervalId);
   }, [isAuthenticated]);
 
-  const fetchExams = async () => {
+  useEffect(() => {
+    const normalized = formData.title.trim().toLowerCase();
+    if (normalized.includes("term final") && !formData.time) {
+      setFormData((prev) => ({ ...prev, time: "10:00" }));
+    }
+  }, [formData.title, formData.time]);
+
+  const fetchExams = async ({ silent = false } = {}) => {
     try {
-      setLoadingExams(true);
+      if (!silent) setLoadingExams(true);
       const response = await axios.get("/exams");
       setExams(response.data);
     } catch (error) {
-      toast.error("Failed to load exams");
+      if (!silent) toast.error("Failed to load exams");
       console.error(error);
     } finally {
-      setLoadingExams(false);
+      if (!silent) setLoadingExams(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const timeValue = formData.time || "00:00";
+      const examDateTime = formData.date
+        ? new Date(`${formData.date}T${timeValue}:00`)
+        : null;
       const examData = {
         ...formData,
+        date: examDateTime ? examDateTime.toISOString() : formData.date,
         topics: formData.topics
           .split(",")
           .map((t) => t.trim())
@@ -161,6 +180,7 @@ export default function Exams() {
         title: "",
         subject: "",
         date: "",
+        time: "",
         topics: "",
         readinessCheckboxes: {
           questionsCollected: false,
@@ -196,6 +216,7 @@ export default function Exams() {
       title: exam.title,
       subject: exam.subject,
       date: exam.date ? exam.date.split("T")[0] : "",
+      time: exam.date ? exam.date.split("T")[1]?.slice(0, 5) || "" : "",
       topics: exam.topics ? exam.topics.join(", ") : "",
       readinessCheckboxes: exam.readinessCheckboxes || {
         questionsCollected: false,
@@ -232,10 +253,10 @@ export default function Exams() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-slate-900 dark:to-gray-800 lg:flex">
       <Sidebar />
 
-      <main className="lg:ml-64 p-6 lg:p-8">
+      <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -266,6 +287,7 @@ export default function Exams() {
                   title: "",
                   subject: "",
                   date: "",
+                  time: "",
                   topics: "",
                   readinessCheckboxes: {
                     questionsCollected: false,
@@ -405,6 +427,14 @@ export default function Exams() {
                                       year: "numeric",
                                       month: "long",
                                       day: "numeric",
+                                    },
+                                  )}
+                                  {" "}
+                                  {new Date(exam.date).toLocaleTimeString(
+                                    "en-US",
+                                    {
+                                      hour: "numeric",
+                                      minute: "2-digit",
                                     },
                                   )}
                                 </p>
@@ -636,19 +666,34 @@ export default function Exams() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="block text-sm font-semibold text-gray-900 dark:text-white">
-                        Exam Date
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) =>
-                          setFormData({ ...formData, date: e.target.value })
-                        }
-                        className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                        required
-                      />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                          Exam Date
+                        </label>
+                        <input
+                          type="date"
+                          value={formData.date}
+                          onChange={(e) =>
+                            setFormData({ ...formData, date: e.target.value })
+                          }
+                          className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-900 dark:text-white">
+                          Exam Time
+                        </label>
+                        <input
+                          type="time"
+                          value={formData.time}
+                          onChange={(e) =>
+                            setFormData({ ...formData, time: e.target.value })
+                          }
+                          className="w-full px-4 py-3 rounded-xl bg-white/70 dark:bg-gray-700/70 border-2 border-gray-200 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                        />
+                      </div>
                     </div>
 
                     <div className="space-y-2">

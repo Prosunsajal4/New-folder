@@ -20,6 +20,7 @@ export default function Notes() {
   const [loadingNotes, setLoadingNotes] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedNote, setSelectedNote] = useState(null);
+  const refreshIntervalMs = 30000;
 
   const [formData, setFormData] = useState({
     title: '',
@@ -35,9 +36,14 @@ export default function Notes() {
   }, [isAuthenticated, loading, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchNotes();
-    }
+    if (!isAuthenticated) return;
+
+    fetchNotes();
+    const intervalId = setInterval(() => {
+      fetchNotes({ silent: true });
+    }, refreshIntervalMs);
+
+    return () => clearInterval(intervalId);
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -54,17 +60,17 @@ export default function Notes() {
     }
   }, [searchQuery, notes]);
 
-  const fetchNotes = async () => {
+  const fetchNotes = async ({ silent = false } = {}) => {
     try {
-      setLoadingNotes(true);
+      if (!silent) setLoadingNotes(true);
       const response = await axios.get('/notes');
       setNotes(response.data);
       setFilteredNotes(response.data);
     } catch (error) {
-      toast.error('Failed to load notes');
+      if (!silent) toast.error('Failed to load notes');
       console.error(error);
     } finally {
-      setLoadingNotes(false);
+      if (!silent) setLoadingNotes(false);
     }
   };
 
@@ -134,10 +140,10 @@ export default function Notes() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
       
-      <main className="lg:ml-64 p-6 lg:p-8">
+      <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

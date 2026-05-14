@@ -15,6 +15,7 @@ export default function Focus() {
   const [stats, setStats] = useState(null);
   const [sessions, setSessions] = useState([]);
   const [loadingStats, setLoadingStats] = useState(true);
+  const refreshIntervalMs = 30000;
 
   // Timer state
   const [minutes, setMinutes] = useState(25);
@@ -31,10 +32,17 @@ export default function Focus() {
   }, [isAuthenticated, loading, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchStats();
+    if (!isAuthenticated) return;
+
+    fetchStats();
+    fetchSessions();
+
+    const intervalId = setInterval(() => {
+      fetchStats({ silent: true });
       fetchSessions();
-    }
+    }, refreshIntervalMs);
+
+    return () => clearInterval(intervalId);
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -56,16 +64,16 @@ export default function Focus() {
     return () => clearInterval(interval);
   }, [isRunning, minutes, seconds]);
 
-  const fetchStats = async () => {
+  const fetchStats = async ({ silent = false } = {}) => {
     try {
-      setLoadingStats(true);
+      if (!silent) setLoadingStats(true);
       const response = await axios.get('/focus/stats');
       setStats(response.data);
     } catch (error) {
-      toast.error('Failed to load focus stats');
+      if (!silent) toast.error('Failed to load focus stats');
       console.error(error);
     } finally {
-      setLoadingStats(false);
+      if (!silent) setLoadingStats(false);
     }
   };
 
@@ -158,10 +166,10 @@ export default function Focus() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
       
-      <main className="lg:ml-64 p-6 lg:p-8">
+      <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

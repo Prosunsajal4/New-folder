@@ -27,6 +27,7 @@ export default function Dashboard() {
   const [chartData, setChartData] = useState(null);
   const [deadlines, setDeadlines] = useState(null);
   const [loadingStats, setLoadingStats] = useState(true);
+  const refreshIntervalMs = 30000;
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -35,14 +36,19 @@ export default function Dashboard() {
   }, [isAuthenticated, loading, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchDashboardData();
-    }
+    if (!isAuthenticated) return;
+
+    fetchDashboardData();
+    const intervalId = setInterval(() => {
+      fetchDashboardData({ silent: true });
+    }, refreshIntervalMs);
+
+    return () => clearInterval(intervalId);
   }, [isAuthenticated]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = async ({ silent = false } = {}) => {
     try {
-      setLoadingStats(true);
+      if (!silent) setLoadingStats(true);
       
       const [statsRes, chartRes, deadlinesRes] = await Promise.all([
         axios.get('/dashboard/stats'),
@@ -54,10 +60,10 @@ export default function Dashboard() {
       setChartData(chartRes.data);
       setDeadlines(deadlinesRes.data);
     } catch (error) {
-      toast.error('Failed to load dashboard data');
+      if (!silent) toast.error('Failed to load dashboard data');
       console.error(error);
     } finally {
-      setLoadingStats(false);
+      if (!silent) setLoadingStats(false);
     }
   };
 
@@ -72,10 +78,10 @@ export default function Dashboard() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
       
-      <main className="lg:ml-64 p-6 lg:p-8">
+      <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

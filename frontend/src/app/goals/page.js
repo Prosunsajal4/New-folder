@@ -16,6 +16,7 @@ export default function Goals() {
   const [showModal, setShowModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState(null);
   const [loadingGoals, setLoadingGoals] = useState(true);
+  const refreshIntervalMs = 30000;
 
   const [formData, setFormData] = useState({
     type: 'custom',
@@ -33,21 +34,26 @@ export default function Goals() {
   }, [isAuthenticated, loading, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchGoals();
-    }
+    if (!isAuthenticated) return;
+
+    fetchGoals();
+    const intervalId = setInterval(() => {
+      fetchGoals({ silent: true });
+    }, refreshIntervalMs);
+
+    return () => clearInterval(intervalId);
   }, [isAuthenticated]);
 
-  const fetchGoals = async () => {
+  const fetchGoals = async ({ silent = false } = {}) => {
     try {
-      setLoadingGoals(true);
+      if (!silent) setLoadingGoals(true);
       const response = await axios.get('/goals');
       setGoals(response.data);
     } catch (error) {
-      toast.error('Failed to load goals');
+      if (!silent) toast.error('Failed to load goals');
       console.error(error);
     } finally {
-      setLoadingGoals(false);
+      if (!silent) setLoadingGoals(false);
     }
   };
 
@@ -136,10 +142,10 @@ export default function Goals() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
       
-      <main className="lg:ml-64 p-6 lg:p-8">
+      <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -16,6 +16,7 @@ export default function Assignments() {
   const [showModal, setShowModal] = useState(false);
   const [editingAssignment, setEditingAssignment] = useState(null);
   const [loadingAssignments, setLoadingAssignments] = useState(true);
+  const refreshIntervalMs = 30000;
 
   const [formData, setFormData] = useState({
     title: '',
@@ -33,21 +34,26 @@ export default function Assignments() {
   }, [isAuthenticated, loading, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchAssignments();
-    }
+    if (!isAuthenticated) return;
+
+    fetchAssignments();
+    const intervalId = setInterval(() => {
+      fetchAssignments({ silent: true });
+    }, refreshIntervalMs);
+
+    return () => clearInterval(intervalId);
   }, [isAuthenticated]);
 
-  const fetchAssignments = async () => {
+  const fetchAssignments = async ({ silent = false } = {}) => {
     try {
-      setLoadingAssignments(true);
+      if (!silent) setLoadingAssignments(true);
       const response = await axios.get('/assignments');
       setAssignments(response.data);
     } catch (error) {
-      toast.error('Failed to load assignments');
+      if (!silent) toast.error('Failed to load assignments');
       console.error(error);
     } finally {
-      setLoadingAssignments(false);
+      if (!silent) setLoadingAssignments(false);
     }
   };
 
@@ -143,10 +149,10 @@ export default function Assignments() {
   if (!isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
       
-      <main className="lg:ml-64 p-6 lg:p-8">
+      <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

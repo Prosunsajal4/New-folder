@@ -28,6 +28,7 @@ export default function Attendance() {
   const [predictions, setPredictions] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [saving, setSaving] = useState(false);
+  const refreshIntervalMs = 30000;
 
   const [newCourse, setNewCourse] = useState({
     name: '',
@@ -42,24 +43,34 @@ export default function Attendance() {
   }, [isAuthenticated, loading, router]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchCourses();
-    }
+    if (!isAuthenticated) return;
+
+    fetchCourses();
+    const intervalId = setInterval(() => {
+      fetchCourses({ silent: true });
+    }, refreshIntervalMs);
+
+    return () => clearInterval(intervalId);
   }, [isAuthenticated]);
 
-  const fetchCourses = async () => {
+  const fetchCourses = async ({ silent = false } = {}) => {
     try {
-      setLoadingCourses(true);
+      if (!silent) setLoadingCourses(true);
       const response = await axios.get('/courses');
       setCourses(response.data);
       if (response.data.length > 0) {
-        setSelectedCourse(response.data[0]);
+        const current = selectedCourse
+          ? response.data.find((course) => course._id === selectedCourse._id)
+          : response.data[0];
+        setSelectedCourse(current || response.data[0]);
+      } else {
+        setSelectedCourse(null);
       }
     } catch (error) {
-      toast.error('Failed to load courses');
+      if (!silent) toast.error('Failed to load courses');
       console.error(error);
     } finally {
-      setLoadingCourses(false);
+      if (!silent) setLoadingCourses(false);
     }
   };
 
@@ -112,6 +123,7 @@ export default function Attendance() {
       setSelectedCourse(updatedCourse);
       setCourses(courses.map(c => c._id === selectedCourse._id ? updatedCourse : c));
       toast.success('Attendance updated');
+      fetchCourses({ silent: true });
     } catch (error) {
       toast.error('Failed to update attendance');
       console.error(error);
@@ -168,10 +180,10 @@ export default function Attendance() {
   const stats = selectedCourse?.attendanceStats || {};
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
       
-      <main className="lg:ml-64 p-6 lg:p-8">
+      <main className="flex-1 p-6 lg:p-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
