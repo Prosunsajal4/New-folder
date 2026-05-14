@@ -107,7 +107,7 @@ router.post("/chat", protect, async (req, res) => {
     if (serviceType === "gemini") {
       try {
         console.log("Using Gemini API");
-        const models = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+        const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
         let model = null;
 
         for (const modelName of models) {
