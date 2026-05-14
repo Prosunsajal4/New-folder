@@ -104,41 +104,58 @@ router.post("/chat", protect, async (req, res) => {
 
     // Use Gemini or OpenAI based on what's available
     if (serviceType === "gemini") {
-      console.log("Using Gemini AI service");
-      // Use gemini-pro which is widely available and stable
-      const model = aiService.getGenerativeModel({ model: "gemini-pro" });
+      try {
+        console.log("Using Gemini AI service");
+        // Use gemini-pro which is widely available and stable
+        const model = aiService.getGenerativeModel({ model: "gemini-pro" });
 
-      const trimmedMessages = Array.isArray(messages)
-        ? messages
-            .filter(
-              (m) =>
-                m && (m.role === "user" || m.role === "assistant") && m.content,
-            )
-            .slice(-10)
-        : [];
-
-      const conversation =
-        trimmedMessages.length > 0
-          ? trimmedMessages
-              .map(
+        const trimmedMessages = Array.isArray(messages)
+          ? messages
+              .filter(
                 (m) =>
-                  `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`,
+                  m && (m.role === "user" || m.role === "assistant") && m.content,
               )
-              .join("\n\n")
-          : message;
+              .slice(-10)
+          : [];
 
-      const prompt = `You are StudentOS AI Assistant. Provide clear, accurate, and practical help for students. Ask clarifying questions when needed. Use concise steps, examples, and avoid fluff. If asked for calculations, request the required numbers. If a request is ambiguous, ask one short follow-up question.
+        const conversation =
+          trimmedMessages.length > 0
+            ? trimmedMessages
+                .map(
+                  (m) =>
+                    `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`,
+                )
+                .join("\n\n")
+            : message;
+
+        const prompt = `You are StudentOS AI Assistant. Provide clear, accurate, and practical help for students. Ask clarifying questions when needed. Use concise steps, examples, and avoid fluff. If asked for calculations, request the required numbers. If a request is ambiguous, ask one short follow-up question.
 
 ${context ? `Context: ${String(context)}` : ""}
 
 ${conversation}`;
 
-      console.log("Calling Gemini API...");
-      const result = await model.generateContent(prompt);
-      const response = result.response.text();
-      console.log("Gemini response received, length:", response?.length);
+        console.log("Calling Gemini API...");
+        const result = await model.generateContent(prompt);
+        const response = result.response.text();
+        console.log("Gemini response received, length:", response?.length);
 
-      res.json({ response });
+        res.json({ response });
+      } catch (geminiError) {
+        console.warn("Gemini API failed:", geminiError.message);
+        console.log("Falling back to built-in responses");
+        // Fall back to built-in responses
+        const text = String(message || "").toLowerCase();
+        
+        if (text.includes("routine") || text.includes("schedule") || text.includes("plan")) {
+          return res.json({
+            response: "Here's a balanced daily study routine:\n\n📚 **Morning (9-11 AM):** Review yesterday's notes (45 min) + Light exercise\n\n🎯 **Midday (12-3 PM):** 2 focused study blocks (45 min each) with 10 min breaks\n\n📝 **Afternoon (4-6 PM):** Practice problems/assignments (60 min) + Short break\n\n🔄 **Evening (7-9 PM):** Quick review + Plan tomorrow's priorities\n\n💤 **Night:** Relax 30 min before bed\n\n💡 **Tips:** Use Pomodoro (25 min study + 5 min break), stay hydrated, and get 7-8 hours sleep. Want me to customize this for your subjects?",
+          });
+        }
+        
+        return res.json({
+          response: "I'm your AI study assistant! I can help with:\n\n📚 Study planning and routines\n📊 Attendance calculations\n📝 Concept explanations\n💡 Productivity tips\n🎯 Goal setting\n\nWhat would you like help with? Be specific for better assistance!",
+        });
+      }
     } else if (serviceType === "openai") {
       console.log("Using OpenAI service");
       const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
