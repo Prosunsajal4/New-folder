@@ -19,27 +19,38 @@ router.post("/chat", protect, async (req, res) => {
 
     if (!openai) {
       const text = String(message || "").toLowerCase();
-      if (text.includes("routine")) {
+      
+      // Study routine requests
+      if (text.includes("routine") || text.includes("schedule") || text.includes("plan")) {
         return res.json({
-          response:
-            "Here is a simple daily routine: 1) Morning: review notes 30–45m. 2) Midday: 2 focused study blocks (25–40m each). 3) Evening: practice problems 45–60m. 4) Night: quick recap + plan tomorrow. Want it customized by subjects and free time?",
+          response: "Here's a balanced daily study routine:\n\n📚 **Morning (9-11 AM):** Review yesterday's notes (45 min) + Light exercise\n\n🎯 **Midday (12-3 PM):** 2 focused study blocks (45 min each) with 10 min breaks\n\n📝 **Afternoon (4-6 PM):** Practice problems/assignments (60 min) + Short break\n\n🔄 **Evening (7-9 PM):** Quick review + Plan tomorrow's priorities\n\n💤 **Night:** Relax 30 min before bed\n\n💡 **Tips:** Use Pomodoro (25 min study + 5 min break), stay hydrated, and get 7-8 hours sleep. Want me to customize this for your subjects?",
         });
       }
-      if (text.includes("attendance")) {
+      
+      // Attendance calculations
+      if (text.includes("attendance") || text.includes("miss") || text.includes("safe")) {
         return res.json({
-          response:
-            "I can calculate attendance and safe absences. Share: total classes, attended classes, and required percentage (e.g., 75% or 80%).",
+          response: "I can help calculate attendance! Please provide:\n- Total classes held\n- Classes you've attended\n- Required attendance percentage (usually 75-80%)\n\nExample: 'I have 50 total classes, attended 40, need 75% minimum'\n\nI'll tell you how many more classes you can miss safely!",
         });
       }
-      if (text.includes("explain")) {
+      
+      // Explanations
+      if (text.includes("explain") || text.includes("what") || text.includes("how")) {
         return res.json({
-          response:
-            "I can explain step-by-step. Tell me the exact topic and your current level (beginner/intermediate/advanced).",
+          response: "I'll explain concepts step-by-step! Please tell me:\n- The specific topic/subject\n- Your current level (beginner/intermediate/advanced)\n- What you already understand\n\nFor example: 'Explain calculus derivatives, I'm intermediate level'",
         });
       }
+      
+      // Study tips and productivity
+      if (text.includes("tip") || text.includes("productivity") || text.includes("focus") || text.includes("study")) {
+        return res.json({
+          response: "Here are proven study tips:\n\n🎯 **Active Recall:** Test yourself instead of re-reading\n\n📝 **Spaced Repetition:** Review material over increasing intervals\n\n🧠 **Feynman Technique:** Explain concepts in simple terms\n\n⏰ **Pomodoro:** 25 min focused work + 5 min break\n\n📚 **Environment:** Quiet, well-lit space with no distractions\n\n💡 **Sleep & Nutrition:** 7-8 hours sleep + healthy meals\n\nWant tips for a specific subject or issue?",
+        });
+      }
+      
+      // Default helpful response
       return res.json({
-        response:
-          "I can help with study plans, explanations, summaries, and productivity tips. Tell me your subject, deadline, and how much time you have each day.",
+        response: "I'm your AI study assistant! I can help with:\n\n📚 Study planning and routines\n📊 Attendance calculations\n📝 Concept explanations\n💡 Productivity tips\n🎯 Goal setting\n\nWhat would you like help with? Be specific for better assistance!",
       });
     }
 

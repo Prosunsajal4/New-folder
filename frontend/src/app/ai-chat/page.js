@@ -57,12 +57,13 @@ export default function AIChat() {
         { role: "assistant", content: response.data.response },
       ]);
     } catch (error) {
-      toast.error("Failed to get AI response");
+      console.error("AI Chat Error:", error);
+      toast.error("AI service temporarily unavailable. Please try again.");
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
+          content: "Sorry, I'm having trouble connecting right now. Please check your internet connection and try again in a moment.",
         },
       ]);
     } finally {
