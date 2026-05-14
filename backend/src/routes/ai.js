@@ -9,7 +9,6 @@ let serviceType = "none";
 console.log("Initializing AI service...");
 console.log("Environment check - OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "SET" : "NOT SET");
 console.log("Environment check - GEMINI_API_KEY_NEW:", process.env.GEMINI_API_KEY_NEW ? "SET" : "NOT SET");
-console.log("Environment check - GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "SET" : "NOT SET");
 
 // Try OpenAI first (more reliable)
 if (process.env.OPENAI_API_KEY) {
@@ -25,18 +24,15 @@ if (process.env.OPENAI_API_KEY) {
   }
 }
 
-// Fall back to Gemini if OpenAI not available (prefer new key)
-if (!aiService) {
-  const geminiKey = process.env.GEMINI_API_KEY_NEW || process.env.GEMINI_API_KEY;
-  if (geminiKey) {
-    try {
-      const { GoogleGenerativeAI } = require("@google/generative-ai");
-      aiService = new GoogleGenerativeAI(geminiKey);
-      serviceType = "gemini";
-      console.log("✅ Gemini AI service initialized successfully");
-    } catch (error) {
-      console.error("❌ Failed to initialize Gemini:", error.message);
-    }
+// Fall back to Gemini if OpenAI not available
+if (!aiService && process.env.GEMINI_API_KEY_NEW) {
+  try {
+    const { GoogleGenerativeAI } = require("@google/generative-ai");
+    aiService = new GoogleGenerativeAI(process.env.GEMINI_API_KEY_NEW);
+    serviceType = "gemini";
+    console.log("✅ Gemini AI service initialized successfully");
+  } catch (error) {
+    console.error("❌ Failed to initialize Gemini:", error.message);
   }
 } 
 
