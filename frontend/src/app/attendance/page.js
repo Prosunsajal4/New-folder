@@ -30,11 +30,48 @@ export default function Attendance() {
   const [saving, setSaving] = useState(false);
   const refreshIntervalMs = 10000;
 
-  const [newCourse, setNewCourse] = useState({
-    name: "",
-    sectionA: { totalClasses: 30, attended: [] },
-    sectionB: { totalClasses: 30, attended: [] },
-  });
+  const calculateAttendanceStats = (course) => {
+    if (!course) return {};
+
+    const sectionAAttended = course.sectionA.attended.length;
+    const sectionBAttended = course.sectionB.attended.length;
+    const sectionAPercentage = (sectionAAttended / course.sectionA.totalClasses) * 100;
+    const sectionBPercentage = (sectionBAttended / course.sectionB.totalClasses) * 100;
+    const totalAttended = sectionAAttended + sectionBAttended;
+    const totalClasses = course.sectionA.totalClasses + course.sectionB.totalClasses;
+    const totalPercentage = (totalAttended / totalClasses) * 100;
+
+    // Section marks (5 marks each)
+    const sectionAMarks = (sectionAPercentage / 100) * 5;
+    const sectionBMarks = (sectionBPercentage / 100) * 5;
+    const totalMarks = sectionAMarks + sectionBMarks;
+
+    // Safe absences calculation (assuming 80% is safe)
+    const requiredAttendance = totalClasses * 0.8;
+    const safeAbsences = Math.max(0, Math.floor(totalClasses - requiredAttendance - (totalClasses - totalAttended)));
+
+    return {
+      sectionA: {
+        attended: sectionAAttended,
+        missed: course.sectionA.totalClasses - sectionAAttended,
+        percentage: sectionAPercentage.toFixed(2),
+        marks: sectionAMarks.toFixed(2),
+      },
+      sectionB: {
+        attended: sectionBAttended,
+        missed: course.sectionB.totalClasses - sectionBAttended,
+        percentage: sectionBPercentage.toFixed(2),
+        marks: sectionBMarks.toFixed(2),
+      },
+      total: {
+        attended: totalAttended,
+        missed: totalClasses - totalAttended,
+        percentage: totalPercentage.toFixed(2),
+        marks: totalMarks.toFixed(2),
+        safeAbsences: safeAbsences,
+      },
+    };
+  };
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -180,7 +217,7 @@ export default function Attendance() {
 
   if (!isAuthenticated) return null;
 
-  const stats = selectedCourse?.attendanceStats || {};
+  const stats = calculateAttendanceStats(selectedCourse);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
