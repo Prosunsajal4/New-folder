@@ -3,7 +3,7 @@ import axios from "axios";
 const axiosInstance = axios.create({
   baseURL:
     process.env.NEXT_PUBLIC_API_URL ||
-    "https://studentosbackend.vercel.app/api",
+    "https://studentosbackend-eku6oi0pi-prosuns-projects.vercel.app/api",
   headers: {
     "Content-Type": "application/json",
   },
