@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../components/Sidebar";
+import Header from "../../components/Header";
 import axios from "../../lib/axios";
 import { motion } from "framer-motion";
 import {
@@ -192,25 +193,27 @@ export default function Attendance() {
   const renderAttendanceGrid = (section, totalClasses) => {
     const attended = selectedCourse[section].attended;
     return (
-      <div className="grid grid-cols-6 sm:grid-cols-10 gap-2">
-        {Array.from({ length: totalClasses }, (_, i) => i + 1).map(
-          (classNum) => (
-            <motion.button
-              key={classNum}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => toggleAttendance(section, classNum)}
-              disabled={saving}
-              className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center text-xs font-medium transition-all ${
-                attended.includes(classNum)
-                  ? "bg-green-500 text-white"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
-              }`}
-            >
-              {classNum}
-            </motion.button>
-          ),
-        )}
+      <div className="overflow-x-auto">
+        <div className="flex flex-wrap gap-2 min-w-max">
+          {Array.from({ length: totalClasses }, (_, i) => i + 1).map(
+            (classNum) => (
+              <motion.button
+                key={classNum}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => toggleAttendance(section, classNum)}
+                disabled={saving}
+                className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold transition-all ${
+                  attended.includes(classNum)
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                }`}
+              >
+                {classNum}
+              </motion.button>
+            ),
+          )}
+        </div>
       </div>
     );
   };
@@ -231,21 +234,18 @@ export default function Attendance() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
 
-      <main className="flex-1 p-6 lg:p-8">
+      <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Attendance Tracker
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Track and manage your course attendance
-              </p>
-            </div>
+          <Header 
+            title="Attendance Tracker" 
+            subtitle="Track and manage your course attendance"
+          />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+            <div></div>
             <div className="flex gap-3">
               <button
                 onClick={handleGetPredictions}

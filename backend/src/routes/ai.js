@@ -1,43 +1,45 @@
 const express = require("express");
 const router = express.Router();
+const multer = require("multer");
 const protect = require("../middleware/auth");
+const path = require("path");
 
-// Initialize AI service (OpenAI preferred, fallback to Gemini)
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ['.pdf', '.txt', '.md', '.doc', '.docx', '.jpg', '.jpeg', '.png', '.gif'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowedTypes.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Allowed: PDF, TXT, MD, DOC, DOCX, Images'));
+    }
+  }
+});
+
+// Initialize AI service (Gemini preferred for free tier)
 let aiService = null;
 let serviceType = "none";
 
 console.log("Initializing AI service...");
 console.log("Environment check - OPENAI_API_KEY:", process.env.OPENAI_API_KEY ? "SET" : "NOT SET");
-console.log("Environment check - GEMINI_API_KEY_NEW:", process.env.GEMINI_API_KEY_NEW ? "SET" : "NOT SET");
 console.log("Environment check - GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "SET" : "NOT SET");
 
-// Try OpenAI first (more reliable)
-if (process.env.OPENAI_API_KEY) {
-  try {
-    const OpenAI = require("openai");
-    aiService = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-    serviceType = "openai";
-    console.log("✅ OpenAI service initialized successfully");
-  } catch (error) {
-    console.error("❌ Failed to initialize OpenAI:", error.message);
-  }
+// Try Gemini first (free tier, no quota)
+const geminiKey = process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_NEW;
+if (geminiKey) {
+  aiService = { type: "gemini-fetch", key: geminiKey };
+  serviceType = "gemini-fetch";
+  console.log("✅ Gemini REST API configured");
 }
 
-// Fall back to Gemini if OpenAI not available (prefer new key)
-if (!aiService) {
-  const geminiKey = process.env.GEMINI_API_KEY_NEW || process.env.GEMINI_API_KEY;
-  if (geminiKey) {
-    try {
-      const { GoogleGenerativeAI } = require("@google/generative-ai");
-      aiService = new GoogleGenerativeAI(geminiKey);
-      serviceType = "gemini";
-      console.log("✅ Gemini AI service initialized successfully");
-    } catch (error) {
-      console.error("❌ Failed to initialize Gemini:", error.message);
-    }
-  }
+// Try OpenAI if Gemini not available
+if (!aiService && process.env.OPENAI_API_KEY) {
+  aiService = { type: "openai-fetch", key: process.env.OPENAI_API_KEY };
+  serviceType = "openai-fetch";
+  console.log("✅ OpenAI (fetch) service configured");
 } 
 
 if (!aiService) {
@@ -67,101 +69,128 @@ function findBestResponse(message) {
 }
 
 // @route   POST /api/ai/chat
-// @desc    AI chat assistant
+// @desc    AI chat assistant with file upload support
 // @access  Private
-router.post("/chat", protect, async (req, res) => {
+router.post("/chat", protect, upload.array('files', 5), async (req, res) => {
   try {
     const { message, context, messages } = req.body;
-    console.log("AI Chat request:", { msgLength: message?.length, serviceType });
+    const files = req.files || [];
+
+    let fileContent = '';
+    if (files.length > 0) {
+      fileContent = '\n\nAttached files:\n';
+      files.forEach((file, index) => {
+        const fileName = file.originalname;
+        fileContent += `${index + 1}. ${fileName} (${file.mimetype}, ${Math.round(file.size / 1024)}KB)\n`;
+        if (file.mimetype === 'text/plain' || file.mimetype === 'text/markdown') {
+          fileContent += `   Content: ${file.buffer.toString('utf-8').substring(0, 1000)}\n`;
+        }
+      });
+    }
+
+    const fullMessage = message + fileContent;
 
     // If no service configured, use intelligent fallback
     if (!aiService) {
-      console.log("No AI service, using fallback responses");
-      return res.json({ response: findBestResponse(message) });
+      return res.json({ response: findBestResponse(fullMessage) });
     }
 
-    // Try OpenAI
-    if (serviceType === "openai") {
+    // Try OpenAI with fetch
+    if (serviceType === "openai-fetch") {
       try {
-        console.log("Using OpenAI API");
         const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
         const trimmedMessages = Array.isArray(messages)
           ? messages.filter((m) => m && m.role && m.content).slice(-10)
           : [];
-        const conversation = trimmedMessages.length > 0 ? trimmedMessages : [{ role: "user", content: message }];
+        const conversation = trimmedMessages.length > 0 ? trimmedMessages : [{ role: "user", content: fullMessage }];
 
-        const completion = await aiService.chat.completions.create({
-          model,
-          messages: [
-            { role: "system", content: "You are StudentOS AI Assistant. Help with study, productivity, exams. Be practical and concise." },
-            ...(context ? [{ role: "system", content: `Context: ${String(context)}` }] : []),
-            ...conversation,
-          ],
-          max_tokens: 800,
-          temperature: 0.7,
+        const systemMsg = "You are StudentOS AI Assistant. Help with study, productivity, exams. Be practical and concise.";
+        const allMessages = [
+          { role: "system", content: systemMsg },
+          ...(context ? [{ role: "system", content: `Context: ${String(context)}` }] : []),
+          ...conversation,
+        ];
+
+        const fetchRes = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${aiService.key}`
+          },
+          body: JSON.stringify({
+            model,
+            messages: allMessages,
+            max_tokens: 800,
+            temperature: 0.7
+          })
         });
 
-        return res.json({ response: completion.choices[0].message.content });
+        if (!fetchRes.ok) {
+          const errData = await fetchRes.text();
+          throw new Error(`API error ${fetchRes.status}: ${errData.substring(0, 100)}`);
+        }
+
+        const data = await fetchRes.json();
+        return res.json({ response: data.choices[0].message.content });
       } catch (openaiError) {
-        console.warn("OpenAI error:", openaiError.message?.substring(0, 80));
+        console.warn("OpenAI error:", openaiError.message);
       }
     }
 
-    // Try Gemini
-    if (serviceType === "gemini") {
+    // Try Gemini with REST API
+    if (serviceType === "gemini-fetch") {
       try {
-        console.log("Using Gemini API");
-        const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
-        let model = null;
-
-        for (const modelName of models) {
-          try {
-            model = aiService.getGenerativeModel({ model: modelName });
-            console.log("Loaded:", modelName);
-            break;
-          } catch (e) {
-            console.warn("Unavailable:", modelName);
-          }
-        }
-
-        if (!model) throw new Error("No models available");
-
+        const model = "gemini-2.5-flash";
         const trimmedMessages = Array.isArray(messages)
           ? messages.filter((m) => m && m.role && m.content).slice(-10)
           : [];
 
         const conversation = trimmedMessages.length > 0
           ? trimmedMessages.map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n\n")
-          : message;
+          : fullMessage;
 
         const prompt = `You are StudentOS AI Assistant. Help with study, productivity, exams. Be practical and concise.
 
 ${context ? `Context: ${String(context)}` : ""}
 
-${conversation}`;
+User: ${conversation}`;
 
-        const result = await aiService.generateContent(prompt);
-        return res.json({ response: result.response.text() });
-      } catch (geminiError) {
-        const msg = geminiError.message || "";
-        console.warn("Gemini error:", msg.substring(0, 80));
-        // If quota error, use intelligent fallback
-        if (msg.includes("429") || msg.includes("quota")) {
-          console.log("Quota exceeded, using fallback");
-          return res.json({
-            response: findBestResponse(message) + "\n\n_AI Note: Using optimized responses. For live AI, upgrade your Gemini API plan._",
-          });
+        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${aiService.key}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 800,
+            }
+          })
+        });
+
+        if (!geminiRes.ok) {
+          const errData = await geminiRes.text();
+          throw new Error(`Gemini API error ${geminiRes.status}: ${errData.substring(0, 100)}`);
         }
+
+        const data = await geminiRes.json();
+        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (!responseText) {
+          throw new Error("No response from Gemini");
+        }
+        
+        return res.json({ response: responseText });
+      } catch (geminiError) {
+        console.warn("Gemini error:", geminiError.message);
       }
     }
 
     // Fallback to intelligent responses
-    console.log("Using intelligent fallback responses");
-    return res.json({ response: findBestResponse(message) });
+    return res.json({ response: findBestResponse(fullMessage) });
   } catch (error) {
     console.error("Chat error:", error.message?.substring(0, 100));
     // Return helpful response even on error
-    return res.json({ response: findBestResponse((req.body?.message || "").toString()) });
+    return res.json({ response: findBestResponse(fullMessage || "") });
   }
 });
 

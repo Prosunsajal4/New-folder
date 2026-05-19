@@ -1,8 +1,13 @@
-# StudentOS - AI-Powered Student Productivity App
+# StudentOS - AI-Powered Student Productivity Platform
 
-A full-stack AI-powered student productivity web application built with Next.js, Express.js, MongoDB, and Google Gemini AI.
+A full-stack AI-powered student productivity web application built with Next.js, Express.js, MongoDB, and Google Gemini AI. Deployed on Vercel with real-time features.
 
-## Features
+## 🔗 Live Demo
+
+- **Frontend:** https://studentos-liart.vercel.app
+- **Backend API:** https://studentosbackend.vercel.app
+
+## ✨ Features
 
 ### Core Features
 - **Authentication System** - JWT-based secure authentication with register, login, and logout
@@ -10,273 +15,195 @@ A full-stack AI-powered student productivity web application built with Next.js,
 - **Attendance Tracker** - Track course attendance with AI-powered predictions
 - **Assignment Manager** - Manage assignments with priority, deadlines, and status tracking
 - **Exam Tracker** - Track exams with countdown, readiness percentage, and topics
-- **Smart Notes System** - Create and manage notes with markdown support and search/filter
+- **Smart Notes System** - Create and manage notes with markdown support
 - **Focus Mode** - Pomodoro timer with session tracking and statistics
 - **Goal Tracker** - Set and track academic and personal goals with progress visualization
 - **AI Study Planner** - Generate personalized study plans based on your schedule
 - **Daily Routine Generator** - AI-powered daily routine optimization
-- **AI Chat Assistant** - Get help with studies, productivity tips, and planning
+- **AI Chat Assistant** - Get help with studies, productivity tips, and file analysis
 
-### Additional Features
-- **Dark/Light Mode** - Toggle between themes with persistence
-- **Responsive Design** - Mobile-optimized layout
-- **Glassmorphism UI** - Modern, beautiful interface with gradients
-- **Smooth Animations** - Framer Motion animations throughout
-- **Productivity Analytics** - Chart.js visualizations for focus hours and progress
+### Latest Features (v2.0)
+- **Real-time Notifications** - Socket.io powered instant notifications
+- **File Upload in AI Chat** - Upload PDF, TXT, DOC files for AI analysis
+- **Notification Bell** - Top-right header with notification dropdown
+- **Progress Bar** - Dynamic goal progress visualization with live updates
 
-## Tech Stack
+## 🛠 Tech Stack
 
 ### Frontend
 - **Next.js 14** - React framework with App Router
 - **React 18** - UI library
-- **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library
-- **Chart.js** - Chart library for analytics
-- **Axios** - HTTP client for API calls
-- **React Hot Toast** - Toast notifications
-- **Lucide React** - Icon library
-- **React Markdown** - Markdown rendering for notes
+- **Tailwind CSS** - Styling
+- **Framer Motion** - Animations
+- **Chart.js** - Analytics charts
+- **Socket.io Client** - Real-time notifications
+- **React Markdown** - Markdown rendering
+- **Lucide React** - Icons
 
 ### Backend
-- **Node.js** - JavaScript runtime
+- **Node.js** - Runtime
 - **Express.js** - Web framework
-- **MongoDB** - NoSQL database
-- **Mongoose** - MongoDB ODM
-- **JWT** - Authentication tokens
-- **OpenAI API** - AI-powered features (optional)
-- **Bcrypt** - Password hashing
+- **MongoDB** - Database
+- **Mongoose** - ODM
+- **JWT** - Authentication
+- **Socket.io** - Real-time events
+- **Google Gemini AI** - AI features
+- **Multer** - File uploads
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 studentos/
 ├── frontend/
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── page.js              # Home/redirect page
-│   │   │   ├── layout.js            # Root layout
-│   │   │   ├── login/page.js        # Login page
-│   │   │   ├── register/page.js     # Register page
-│   │   │   ├── dashboard/page.js    # Dashboard
-│   │   │   ├── attendance/page.js   # Attendance tracker
-│   │   │   ├── assignments/page.js  # Assignment manager
-│   │   │   ├── exams/page.js        # Exam tracker
-│   │   │   ├── notes/page.js        # Notes system
-│   │   │   ├── focus/page.js        # Focus mode (Pomodoro)
-│   │   │   ├── goals/page.js        # Goal tracker
-│   │   │   ├── study-planner/page.js # AI study planner
-│   │   │   ├── routine/page.js      # Daily routine generator
-│   │   │   └── ai-chat/page.js      # AI chat assistant
+│   │   │   ├── page.js                # Landing page
+│   │   │   ├── layout.js             # Root layout
+│   │   │   ├── login/page.js         # Login
+│   │   │   ├── register/page.js      # Register
+│   │   │   ├── dashboard/page.js     # Dashboard
+│   │   │   ├── attendance/page.js    # Attendance
+│   │   │   ├── assignments/page.js  # Assignments
+│   │   │   ├── exams/page.js         # Exams
+│   │   │   ├── notes/page.js         # Notes
+│   │   │   ├── focus/page.js         # Focus mode
+│   │   │   ├── goals/page.js         # Goals
+│   │   │   ├── study-planner/page.js # Study planner
+│   │   │   ├── routine/page.js       # Routine
+│   │   │   └── ai-chat/page.js       # AI chat
 │   │   ├── components/
-│   │   │   ├── Sidebar.js           # Navigation sidebar
-│   │   │   ├── StatCard.js          # Dashboard stat card
-│   │   │   └── FocusChart.js        # Focus hours chart
+│   │   │   ├── Sidebar.js            # Navigation
+│   │   │   ├── Header.js             # Header with notifications
+│   │   │   ├── Notifications.js      # Notification dropdown
+│   │   │   ├── StatCard.js           # Dashboard cards
+│   │   │   └── FocusChart.js         # Focus chart
 │   │   ├── context/
-│   │   │   └── AuthContext.js       # Authentication context
+│   │   │   └── AuthContext.js        # Auth state
+│   │   ├── hooks/
+│   │   │   └── useNotifications.js   # Notifications hook
 │   │   ├── lib/
-│   │   │   └── axios.js             # Axios instance with interceptors
+│   │   │   ├── axios.js              # API client
+│   │   │   └── socket.js             # Socket.io client
 │   │   └── styles/
-│   │       └── globals.css          # Global styles
-│   ├── package.json
-│   ├── next.config.js
-│   ├── tailwind.config.js
-│   └── postcss.config.js
+│   │       └── globals.css           # Global styles
 ├── backend/
 │   ├── src/
 │   │   ├── config/
-│   │   │   └── database.js          # MongoDB connection
+│   │   │   ├── database.js            # MongoDB
+│   │   │   └── socket.js             # Socket.io
 │   │   ├── models/
-│   │   │   ├── User.js              # User model
-│   │   │   ├── Course.js            # Course model
-│   │   │   ├── Assignment.js        # Assignment model
-│   │   │   ├── Exam.js              # Exam model
-│   │   │   ├── Note.js              # Note model
-│   │   │   ├── Goal.js              # Goal model
-│   │   │   └── FocusSession.js      # Focus session model
+│   │   │   ├── User.js, Course.js, Assignment.js
+│   │   │   ├── Exam.js, Note.js, Goal.js
+│   │   │   ├── FocusSession.js, Notification.js
 │   │   ├── routes/
-│   │   │   ├── auth.js              # Authentication routes
-│   │   │   ├── courses.js           # Course routes
-│   │   │   ├── assignments.js       # Assignment routes
-│   │   │   ├── exams.js             # Exam routes
-│   │   │   ├── notes.js             # Note routes
-│   │   │   ├── goals.js             # Goal routes
-│   │   │   ├── focus.js             # Focus session routes
-│   │   │   ├── ai.js                # AI routes
-│   │   │   └── dashboard.js         # Dashboard stats routes
-│   │   ├── middleware/
-│   │   │   ├── auth.js              # JWT authentication middleware
-│   │   │   └── errorHandler.js      # Error handling middleware
+│   │   │   ├── auth.js, courses.js, assignments.js
+│   │   │   ├── exams.js, notes.js, goals.js
+│   │   │   ├── focus.js, ai.js, dashboard.js
+│   │   │   └── notifications.js
 │   │   ├── utils/
-│   │   │   └── generateToken.js     # JWT token generation
-│   │   └── server.js                # Express server
-│   ├── package.json
-│   └── .env.example
+│   │   │   └── notifications.js     # Notification helper
+│   │   └── server.js                 # Express server
+│   └── package.json
 └── README.md
 ```
 
-## Setup Instructions
+## 🚀 Deployment
 
-### Prerequisites
-- Node.js (v18 or higher)
-- MongoDB (local instance or MongoDB Atlas)
-- OpenAI API Key (optional, for AI features)
+### Vercel Deployment
 
-### Backend Setup
+The app is deployed on Vercel with two projects:
+- `studentos` - Frontend (Next.js)
+- `studentosbackend` - Backend (Express.js)
 
-1. Navigate to the backend directory:
-```bash
-cd backend
-```
+### Environment Variables (Backend)
 
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Create a `.env` file in the backend directory:
 ```env
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/studentos
-JWT_SECRET=your_jwt_secret_here
-OPENAI_API_KEY=your_openai_api_key_here
+MONGODB_URI=mongodb+srv://...
+JWT_SECRET=your_secret
+JWT_EXPIRE=7d
+FRONTEND_URL=https://studentos-liart.vercel.app
+GEMINI_API_KEY=your_gemini_key
+NODE_ENV=production
 ```
 
-4. Start the backend server:
-```bash
-npm start
-```
-
-The backend will run on `http://localhost:5000`
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-```bash
-cd frontend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Start the development server:
-```bash
-npm run dev
-```
-
-The frontend will run on `http://localhost:3000`
-
-## API Endpoints
+## 📡 API Endpoints
 
 ### Authentication
-- `POST /api/auth/register` - Register a new user
-- `POST /api/auth/login` - Login user
-- `POST /api/auth/logout` - Logout user
-- `GET /api/auth/me` - Get current user info
-- `PUT /api/auth/theme` - Update user theme preference
+- `POST /api/auth/register` - Register
+- `POST /api/auth/login` - Login
+- `PUT /api/auth/theme` - Update theme
 
-### Courses
-- `GET /api/courses` - Get all courses
-- `POST /api/courses` - Create a new course
-- `PUT /api/courses/:id` - Update a course
-- `DELETE /api/courses/:id` - Delete a course
+### Courses & Attendance
+- `GET/POST /api/courses` - Get/Create courses
+- `PUT/DELETE /api/courses/:id` - Update/Delete
 
 ### Assignments
-- `GET /api/assignments` - Get all assignments
-- `POST /api/assignments` - Create a new assignment
-- `PUT /api/assignments/:id` - Update an assignment
-- `DELETE /api/assignments/:id` - Delete an assignment
+- `GET/POST /api/assignments` - Get/Create
+- `PUT/DELETE /api/assignments/:id` - Update/Delete
 
 ### Exams
-- `GET /api/exams` - Get all exams
-- `POST /api/exams` - Create a new exam
-- `PUT /api/exams/:id` - Update an exam
-- `DELETE /api/exams/:id` - Delete an exam
+- `GET/POST /api/exams` - Get/Create
+- `PUT/DELETE /api/exams/:id` - Update/Delete
 
 ### Notes
-- `GET /api/notes` - Get all notes (with search/filter)
-- `POST /api/notes` - Create a new note
-- `PUT /api/notes/:id` - Update a note
-- `DELETE /api/notes/:id` - Delete a note
+- `GET/POST /api/notes` - Get/Create
+- `PUT/DELETE /api/notes/:id` - Update/Delete
 
 ### Goals
-- `GET /api/goals` - Get all goals
-- `POST /api/goals` - Create a new goal
-- `PUT /api/goals/:id` - Update a goal
-- `DELETE /api/goals/:id` - Delete a goal
+- `GET/POST /api/goals` - Get/Create
+- `PUT/DELETE /api/goals/:id` - Update/Delete
 
-### Focus Sessions
-- `GET /api/focus` - Get all focus sessions
-- `POST /api/focus` - Create a new focus session
-- `GET /api/focus/stats` - Get focus statistics
+### Focus
+- `GET/POST /api/focus` - Get/Create sessions
 
 ### AI Features
-- `POST /api/ai/chat` - AI chat assistant
-- `POST /api/ai/attendance-prediction` - Get attendance predictions
-- `POST /api/ai/study-planner` - Generate study plan
-- `POST /api/ai/routine-generator` - Generate daily routine
+- `POST /api/ai/chat` - AI chat (supports file uploads)
+- `POST /api/ai/attendance-prediction` - Attendance predictions
+- `POST /api/ai/study-planner` - Generate study plans
+- `POST /api/ai/routine-generator` - Generate routines
 
 ### Dashboard
-- `GET /api/dashboard/stats` - Get dashboard statistics
-- `GET /api/dashboard/focus-chart-data` - Get focus chart data
-- `GET /api/dashboard/upcoming-deadlines` - Get upcoming deadlines
+- `GET /api/dashboard/stats` - Statistics
+- `GET /api/dashboard/focus-chart-data` - Chart data
+- `GET /api/dashboard/upcoming-deadlines` - Deadlines
 
-## Usage
+### Notifications
+- `GET /api/notifications` - Get all
+- `GET /api/notifications/unread-count` - Unread count
+- `PUT /api/notifications/:id/read` - Mark as read
+- `PUT /api/notifications/read-all` - Mark all read
+- `DELETE /api/notifications/:id` - Delete
 
-1. **Register** - Create a new account on the registration page
-2. **Login** - Log in with your credentials
-3. **Dashboard** - View your productivity overview
-4. **Attendance** - Add courses and track your attendance
-5. **Assignments** - Manage your assignments with deadlines
-6. **Exams** - Track exams and your preparation progress
-7. **Notes** - Create and organize study notes
-8. **Focus Mode** - Use the Pomodoro timer for focused study sessions
-9. **Goals** - Set and track your academic goals
-10. **Study Planner** - Get AI-powered study plans
-11. **Routine** - Generate optimized daily routines
-12. **AI Chat** - Get help with studies and productivity
+## 🎨 UI Features
 
-## AI Features
+- **Dark/Light Mode** - Theme toggle with persistence
+- **Responsive Design** - Mobile-first
+- **Glassmorphism** - Modern card styling
+- **Smooth Animations** - Framer Motion
+- **Real-time Updates** - Socket.io
 
-The AI features use the OpenAI API. To enable them:
-1. Get an API key from https://platform.openai.com/
-2. Add it to your backend `.env` file as `OPENAI_API_KEY`
-3. If no API key is provided, the AI features will use mock responses
+## 🔧 Local Development
 
-## Development
-
-### Frontend Development
 ```bash
+# Backend
+cd backend
+npm install
+npm start
+
+# Frontend
 cd frontend
+npm install
 npm run dev
 ```
 
-### Backend Development
-```bash
-cd backend
-npm start
-```
+## 📝 License
 
-### Production Build
+MIT License - Open source for educational purposes.
 
-**Frontend:**
-```bash
-cd frontend
-npm run build
-npm start
-```
+## 👨‍💻 Developer
 
-**Backend:**
-```bash
-cd backend
-npm start
-```
-
-## License
-
-This project is open source and available for educational purposes.
-
-## Support
-
-For issues or questions, please open an issue on the repository.
+Built with ❤️ by **Prosun Mukherjee**
+- Location: Khulna, Bangladesh
+- Email: prosunsajal123@gmail.com
+- GitHub: github.com

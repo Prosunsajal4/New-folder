@@ -1,7 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
 const connectDB = require('./config/database');
+const { init: initSocket } = require('./config/socket');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -13,8 +15,13 @@ const goalRoutes = require('./routes/goals');
 const focusRoutes = require('./routes/focus');
 const aiRoutes = require('./routes/ai');
 const dashboardRoutes = require('./routes/dashboard');
+const notificationRoutes = require('./routes/notifications');
 
 const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.io
+initSocket(server);
 
 // Connect to database
 connectDB();
@@ -34,6 +41,7 @@ app.use('/api/goals', goalRoutes);
 app.use('/api/focus', focusRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -47,6 +55,6 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

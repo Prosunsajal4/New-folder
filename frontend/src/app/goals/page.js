@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../components/Sidebar";
+import Header from "../../components/Header";
 import axios from "../../lib/axios";
 import { motion } from "framer-motion";
 import { Plus, Edit2, Trash2, Target, TrendingUp } from "lucide-react";
@@ -145,21 +146,15 @@ export default function Goals() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 lg:flex">
       <Sidebar />
 
-      <main className="flex-1 p-6 lg:p-8">
+      <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
+          <Header title="Goals" subtitle="Track your academic and personal goals" />
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                Goals
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Track your academic and personal goals
-              </p>
-            </div>
+            <div></div>
             <button
               onClick={() => {
                 setEditingGoal(null);
@@ -240,15 +235,15 @@ export default function Goals() {
                         Progress
                       </span>
                       <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {goal.progress.toFixed(1)}%
+                        {(goal.progress || 0).toFixed(1)}%
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${Math.min(100, goal.progress)}%` }}
+                        animate={{ width: `${Math.min(100, goal.progress || 0)}%` }}
                         transition={{ duration: 1 }}
-                        className={`h-3 rounded-full bg-gradient-to-r ${getProgressColor(goal.progress)}`}
+                        className={`h-3 rounded-full bg-gradient-to-r ${getProgressColor(goal.progress || 0)}`}
                       />
                     </div>
                   </div>
@@ -260,7 +255,7 @@ export default function Goals() {
                         Current
                       </p>
                       <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {goal.current} {goal.unit}
+                        {goal.current || 0} {goal.unit || ''}
                       </p>
                     </div>
                     <div className="text-right">
@@ -268,7 +263,7 @@ export default function Goals() {
                         Target
                       </p>
                       <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {goal.target} {goal.unit}
+                        {goal.target || 0} {goal.unit || ''}
                       </p>
                     </div>
                   </div>

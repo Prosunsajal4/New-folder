@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Assignment = require('../models/Assignment');
 const protect = require('../middleware/auth');
+const { createNotification } = require('../utils/notifications');
 
 // @route   GET /api/assignments
 // @desc    Get all assignments for a user
@@ -24,6 +25,25 @@ router.post('/', protect, async (req, res) => {
       user: req.user._id,
       ...req.body,
     });
+
+    const daysUntilDue = Math.ceil((new Date(assignment.deadline) - new Date()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilDue <= 3 && daysUntilDue > 0) {
+      createNotification(req.user._id.toString(), {
+        title: 'Assignment Due Soon!',
+        message: `"${assignment.title}" is due in ${daysUntilDue} day(s)`,
+        type: 'assignment',
+        link: '/assignments',
+      });
+    } else if (daysUntilDue <= 0) {
+      createNotification(req.user._id.toString(), {
+        title: 'Assignment Overdue!',
+        message: `"${assignment.title}" is past the deadline`,
+        type: 'assignment',
+        link: '/assignments',
+      });
+    }
+
     res.status(201).json(assignment);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -47,6 +67,12 @@ router.put('/:id', protect, async (req, res) => {
 
     if (req.body.status === 'completed' && assignment.status !== 'completed') {
       req.body.completedAt = new Date();
+      createNotification(req.user._id.toString(), {
+        title: 'Assignment Completed!',
+        message: `Great job! You completed "${assignment.title}"`,
+        type: 'assignment',
+        link: '/assignments',
+      });
     }
 
     Object.assign(assignment, req.body);

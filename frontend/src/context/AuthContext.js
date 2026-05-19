@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from '../lib/axios';
+import { connectSocket, disconnectSocket } from '../lib/socket';
 
 const AuthContext = createContext(null);
 
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }) => {
     if (storedToken && storedUser) {
       setToken(storedToken);
       setUser(JSON.parse(storedUser));
+      connectSocket(JSON.parse(storedUser)._id);
     }
     setLoading(false);
   }, []);
@@ -30,6 +32,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(user));
       setToken(token);
       setUser(user);
+      connectSocket(user._id);
       
       return { success: true };
     } catch (error) {
@@ -49,6 +52,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(user));
       setToken(token);
       setUser(user);
+      connectSocket(user._id);
       
       return { success: true };
     } catch (error) {
@@ -64,6 +68,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     setToken(null);
     setUser(null);
+    disconnectSocket();
   };
 
   const value = {

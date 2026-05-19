@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Exam = require('../models/Exam');
 const protect = require('../middleware/auth');
+const { createNotification } = require('../utils/notifications');
 
 // @route   GET /api/exams
 // @desc    Get all exams for a user
@@ -24,6 +25,25 @@ router.post('/', protect, async (req, res) => {
       user: req.user._id,
       ...req.body,
     });
+
+    const daysUntilExam = Math.ceil((new Date(exam.date) - new Date()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilExam > 0 && daysUntilExam <= 7) {
+      createNotification(req.user._id.toString(), {
+        title: 'Exam Coming Up!',
+        message: `"${exam.subject}" exam in ${daysUntilExam} day(s) - Start preparing!`,
+        type: 'exam',
+        link: '/exams',
+      });
+    } else if (daysUntilExam <= 0) {
+      createNotification(req.user._id.toString(), {
+        title: 'Exam Day!',
+        message: `Good luck with your "${exam.subject}" exam today!`,
+        type: 'exam',
+        link: '/exams',
+      });
+    }
+
     res.status(201).json(exam);
   } catch (error) {
     res.status(500).json({ message: error.message });

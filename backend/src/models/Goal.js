@@ -54,6 +54,9 @@ goalSchema.virtual('progress').get(function () {
   return Math.min(100, (this.current / this.target) * 100);
 });
 
+goalSchema.set('toJSON', { virtuals: true });
+goalSchema.set('toObject', { virtuals: true });
+
 goalSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   if (this.current >= this.target && this.status !== 'completed') {
