@@ -20,12 +20,13 @@ router.get("/stats", protect, async (req, res) => {
     let totalClasses = 0;
 
     courses.forEach((course) => {
-      const sectionAAttended = course.sectionA.attended.length;
-      const sectionBAttended = course.sectionB.attended.length;
-      const sectionATotal = course.sectionA.totalClasses || 0;
-      const sectionBTotal = course.sectionB.totalClasses || 0;
+      const sectionATotal = Number(course.sectionA.totalClasses) || 0;
+      const sectionBTotal = Number(course.sectionB.totalClasses) || 0;
       
-      totalAttended += sectionAAttended + sectionBAttended;
+      const validA = (course.sectionA.attended || []).filter(n => typeof n === 'number' && n > 0 && n <= sectionATotal).length;
+      const validB = (course.sectionB.attended || []).filter(n => typeof n === 'number' && n > 0 && n <= sectionBTotal).length;
+      
+      totalAttended += validA + validB;
       totalClasses += sectionATotal + sectionBTotal;
     });
 
