@@ -50,8 +50,10 @@ const goalSchema = new mongoose.Schema({
 });
 
 goalSchema.virtual('progress').get(function () {
-  if (this.target === 0) return 0;
-  return Math.min(100, (this.current / this.target) * 100);
+  const target = Number(this.target) || 0;
+  const current = Number(this.current) || 0;
+  if (target === 0) return 0;
+  return Math.min(100, (current / target) * 100);
 });
 
 goalSchema.set('toJSON', { virtuals: true });

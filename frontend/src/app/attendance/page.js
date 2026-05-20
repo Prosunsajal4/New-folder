@@ -25,6 +25,11 @@ export default function Attendance() {
   const [courses, setCourses] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [newCourse, setNewCourse] = useState({
+    name: "",
+    sectionA: { totalClasses: 30, attended: [] },
+    sectionB: { totalClasses: 30, attended: [] },
+  });
   const [showPredictions, setShowPredictions] = useState(false);
   const [predictions, setPredictions] = useState([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
