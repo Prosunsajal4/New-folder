@@ -43,15 +43,21 @@ const courseSchema = new mongoose.Schema({
 
 // Calculate attendance statistics
 courseSchema.virtual("attendanceStats").get(function () {
-  const sectionAAttended = this.sectionA.attended.length;
-  const sectionBAttended = this.sectionB.attended.length;
-  const sectionAPercentage =
-    (sectionAAttended / this.sectionA.totalClasses) * 100;
-  const sectionBPercentage =
-    (sectionBAttended / this.sectionB.totalClasses) * 100;
+  const sectionATotal = Number(this.sectionA.totalClasses) || 0;
+  const sectionBTotal = Number(this.sectionB.totalClasses) || 0;
+  
+  const validSectionA = (this.sectionA.attended || []).filter(n => typeof n === 'number' && n > 0 && n <= sectionATotal);
+  const validSectionB = (this.sectionB.attended || []).filter(n => typeof n === 'number' && n > 0 && n <= sectionBTotal);
+  
+  const sectionAAttended = validSectionA.length;
+  const sectionBAttended = validSectionB.length;
+  
+  const sectionAPercentage = sectionATotal > 0 ? (sectionAAttended / sectionATotal) * 100 : 0;
+  const sectionBPercentage = sectionBTotal > 0 ? (sectionBAttended / sectionBTotal) * 100 : 0;
+  
   const totalAttended = sectionAAttended + sectionBAttended;
-  const totalClasses = this.sectionA.totalClasses + this.sectionB.totalClasses;
-  const totalPercentage = (totalAttended / totalClasses) * 100;
+  const totalClasses = sectionATotal + sectionBTotal;
+  const totalPercentage = totalClasses > 0 ? (totalAttended / totalClasses) * 100 : 0;
 
   // Section marks (5 marks each)
   const sectionAMarks = (sectionAPercentage / 100) * 5;
